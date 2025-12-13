@@ -1,0 +1,241 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// Content & Ingestion
+// ============================================
+
+// Normalized text content from YouTube & Reddit
+model ContentItem {
+  id              String   @id @default(uuid())
+  sourcePlatform  String   // "youtube" | "reddit"
+  sourceType      String   // "video" | "reddit_post" | "reddit_comment"
+  sourceId        String   @unique // videoId or post_id/comment_id
+  title           String?
+  bodyText        String   @db.Text
+  metadata        Json     // channelTitle, viewCount, subreddit, score, etc.
+  publishedAt     DateTime
+  ingestedAt      DateTime @default(now())
+  language        String   @default("unknown")
+  embeddingVector Json?    // Array of floats (MVP: JSONB, later: pgvector)
+
+  clusterMemberships ClusterMembership[]
+
+  @@index([sourcePlatform])
+  @@index([publishedAt])
+  @@index([language])
+}
+
+// ============================================
+// Behavior Clusters (Trends)
+// ============================================
+
+// A cluster of related content representing a dating behavior/trend
+model BehaviorCluster {
+  id                 String   @id @default(uuid())
+  label              String   // Short human-readable title
+  summary            String   @db.Text // 1-3 sentence description
+  topPhrases         String[] // Top n-grams/keyphrases
+  contentCountTotal  Int      @default(0)
+  contentCountLast7d Int      @default(0)
+  growthScore        Float    @default(0) // % change or z-score
+  sourceBreakdown    Json     // { youtube: 0.6, reddit: 0.4 }
+  centroidVector     Json?    // Cluster centroid for similarity matching
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  memberships      ClusterMembership[]
+  personaLinks     PersonaClusterLink[]
+  opportunityCards OpportunityCardCluster[]
+
+  @@index([growthScore])
+  @@index([contentCountLast7d])
+}
+
+// Link between content items and clusters
+model ClusterMembership {
+  id              String   @id @default(uuid())
+  clusterId       String
+  contentId       String
+  similarityScore Float    // Distance/similarity to cluster centroid
+  assignedAt      DateTime @default(now())
+
+  cluster BehaviorCluster @relation(fields: [clusterId], references: [id], onDelete: Cascade)
+  content ContentItem     @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@unique([clusterId, contentId])
+  @@index([clusterId])
+  @@index([contentId])
+}
+
+// ============================================
+// Personas
+// ============================================
+
+// Predefined dating personas
+model Persona {
+  id                  String   @id @default(uuid())
+  name                String   @unique // e.g., "Overthinker"
+  tagline             String   // Short tagline
+  description         String   @db.Text
+  emoji               String   // Visual identifier
+  color               String   // Hex color
+  keywords            String[] // Indicative phrases for mapping
+  motivations         String[]
+  fears               String[]
+  datingGoals         String[]
+  typicalBehaviors    String[]
+  communicationStyle  String?
+  painPoints          String[]
+  metadata            Json?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  clusterLinks     PersonaClusterLink[]
+  opportunityCards OpportunityCardPersona[]
+  quizResults      QuizResult[]
+
+  @@index([name])
+}
+
+// Association between personas and behavior clusters
+model PersonaClusterLink {
+  id               String   @id @default(uuid())
+  personaId        String
+  clusterId        String
+  associationScore Float    // 0-1 confidence score
+  assignmentMethod String   @default("auto") // "auto" | "manual_override"
+  reasoning        String?  // Optional explanation
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  persona Persona         @relation(fields: [personaId], references: [id], onDelete: Cascade)
+  cluster BehaviorCluster @relation(fields: [clusterId], references: [id], onDelete: Cascade)
+
+  @@unique([personaId, clusterId])
+  @@index([personaId])
+  @@index([clusterId])
+  @@index([associationScore])
+}
+
+// ============================================
+// Opportunity Cards
+// ============================================
+
+// PM-ready opportunity cards generated from cluster/persona pairings
+model OpportunityCard {
+  id               String   @id @default(uuid())
+  title            String
+  problemStatement String   @db.Text
+  signalsSummary   String   @db.Text // Mention counts, sample phrases, sources
+  whyNow           String   @db.Text // Growth and recency reference
+  status           String   @default("new") // "new" | "reviewed" | "in_discovery" | "discarded"
+  notes            String?  @db.Text
+  severity         String   @default("medium") // "low" | "medium" | "high" | "critical"
+  confidence       Float    @default(0) // 0-1
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  clusters OpportunityCardCluster[]
+  personas OpportunityCardPersona[]
+
+  @@index([status])
+  @@index([severity])
+  @@index([createdAt])
+}
+
+// Many-to-many: OpportunityCard <-> BehaviorCluster
+model OpportunityCardCluster {
+  id              String @id @default(uuid())
+  opportunityId   String
+  clusterId       String
+
+  opportunity OpportunityCard @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  cluster     BehaviorCluster @relation(fields: [clusterId], references: [id], onDelete: Cascade)
+
+  @@unique([opportunityId, clusterId])
+}
+
+// Many-to-many: OpportunityCard <-> Persona
+model OpportunityCardPersona {
+  id              String @id @default(uuid())
+  opportunityId   String
+  personaId       String
+
+  opportunity OpportunityCard @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  persona     Persona         @relation(fields: [personaId], references: [id], onDelete: Cascade)
+
+  @@unique([opportunityId, personaId])
+}
+
+// ============================================
+// Quiz
+// ============================================
+
+// Quiz question definitions
+model QuizQuestion {
+  id      String   @id @default(uuid())
+  order   Int      @unique // Question order
+  text    String
+  subtext String?
+  options QuizOption[]
+
+  @@index([order])
+}
+
+// Quiz answer options
+model QuizOption {
+  id         String @id @default(uuid())
+  questionId String
+  text       String
+  scores     Json   // { personaId: score }
+
+  question QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([questionId])
+}
+
+// Quiz result records
+model QuizResult {
+  id                 String   @id @default(uuid())
+  primaryPersonaId   String
+  secondaryPersonaId String?
+  scores             Json     // { personaId: totalScore }
+  answers            Json     // { questionId: optionId }
+  metadata           Json?    // referrer, userAgent, etc.
+  createdAt          DateTime @default(now())
+
+  primaryPersona Persona @relation(fields: [primaryPersonaId], references: [id])
+
+  @@index([primaryPersonaId])
+  @@index([createdAt])
+}
+
+// ============================================
+// Pipeline State
+// ============================================
+
+// Track ingestion job runs for idempotency
+model IngestionRun {
+  id              String    @id @default(uuid())
+  source          String    // "youtube" | "reddit"
+  startedAt       DateTime  @default(now())
+  completedAt     DateTime?
+  itemsProcessed  Int       @default(0)
+  itemsIngested   Int       @default(0)
+  lastSourceId    String?   // For pagination/continuation
+  status          String    @default("running") // "running" | "completed" | "failed"
+  error           String?
+
+  @@index([source])
+  @@index([startedAt])
+}
