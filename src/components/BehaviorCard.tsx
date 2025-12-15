@@ -8,7 +8,6 @@ import { TrendingUp, Users, Bookmark, BookmarkCheck, ExternalLink } from 'lucide
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { HoverCard } from '@/components/ui/MotionPrimitives'
-import { personas } from '@/data/mock-data'
 
 interface BehaviorCardProps {
     trend: BehaviorTrend
@@ -16,7 +15,10 @@ interface BehaviorCardProps {
 }
 
 export function BehaviorCard({ trend, onClick }: BehaviorCardProps) {
-    const [isSaved, setIsSaved] = useState(trend.isSaved)
+    const [isSaved, setIsSaved] = useState(false)
+
+    // Safely get platforms array
+    const platforms = trend.platforms || []
 
     return (
         <HoverCard
@@ -57,13 +59,13 @@ export function BehaviorCard({ trend, onClick }: BehaviorCardProps) {
 
             {/* Description */}
             <p className="mb-4 text-sm text-surface-400 line-clamp-2">
-                {trend.description}
+                {trend.description || 'No description available'}
             </p>
 
             {/* Sparkline Area */}
             <div className="mb-4 h-16 w-full">
                 <Sparkline
-                    data={trend.sparklineData}
+                    data={trend.sparklineData || []}
                     color={trend.growthRate > 0 ? '#10b981' : '#ef4444'}
                     height={64}
                 />
@@ -84,40 +86,36 @@ export function BehaviorCard({ trend, onClick }: BehaviorCardProps) {
 
                 {/* Platform Icons (mini) */}
                 <div className="flex -space-x-2">
-                    {trend.platformBreakdown.slice(0, 3).map((p, i) => (
+                    {platforms.slice(0, 3).map((p, i) => (
                         <div
-                            key={p.sourceId}
+                            key={p.name || i}
                             className="flex h-6 w-6 items-center justify-center rounded-full border border-surface-900 bg-surface-800 text-[10px] text-surface-400 ring-2 ring-surface-950"
                             style={{ zIndex: 3 - i }}
                         >
-                            {p.sourceId.charAt(0).toUpperCase()}
+                            {(p.name || 'U').charAt(0).toUpperCase()}
                         </div>
                     ))}
                 </div>
             </div>
 
             {/* Linked Personas */}
-            <div className="flex items-center gap-2 border-t border-surface-800 pt-4 mt-4">
-                <span className="text-xs text-surface-500">Personas:</span>
-                <div className="flex items-center gap-1.5">
-                    {trend.linkedPersonas.slice(0, 3).map((link) => {
-                        const persona = personas.find(p => p.id === link.personaId)
-                        if (!persona) return null
-                        return (
+            {trend.linkedPersonas && trend.linkedPersonas.length > 0 && (
+                <div className="flex items-center gap-2 border-t border-surface-800 pt-4 mt-4">
+                    <span className="text-xs text-surface-500">Personas:</span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                        {(Array.isArray(trend.linkedPersonas) ? trend.linkedPersonas : []).slice(0, 3).map((persona, i) => (
                             <div
-                                key={link.personaId}
+                                key={typeof persona === 'string' ? persona : i}
                                 className="flex items-center gap-1 rounded-full bg-surface-800 px-2 py-0.5"
-                                title={`${persona.name} (${(link.confidence * 100).toFixed(0)}% confidence)`}
                             >
-                                <span className="text-sm">{persona.emoji}</span>
                                 <span className="text-xs text-surface-300">
-                                    {(link.confidence * 100).toFixed(0)}%
+                                    {typeof persona === 'string' ? persona : 'Unknown'}
                                 </span>
                             </div>
-                        )
-                    })}
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Hover indicator */}
             <div className="absolute bottom-4 right-4 opacity-0 transition-opacity group-hover:opacity-100">
