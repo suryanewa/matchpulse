@@ -1,12 +1,11 @@
 /**
- * Reddit API Ingestion Client
+ * Reddit RSS Ingestion Client
  * 
- * Fetches dating-related posts and comments from Reddit
- * using Reddit's public JSON API.
+ * Fetches dating-related posts from Reddit using public RSS feeds.
+ * No authentication required - great for development or when awaiting API approval.
  */
 
 import prisma from '@/lib/db'
-import { Prisma } from '@prisma/client'
 
 // Subreddits to monitor
 const SUBREDDITS = [
@@ -20,144 +19,29 @@ const SUBREDDITS = [
 ]
 
 // Maximum posts per subreddit
-const MAX_POSTS_PER_SUBREDDIT = 100
+const MAX_POSTS_PER_SUBREDDIT = 25 // RSS feeds typically return ~25 items
 
-// Maximum total posts per day
-const MAX_POSTS_PER_DAY = 3000
-
-// Whether to fetch comments for high-score posts
-const FETCH_COMMENTS = true
-const COMMENT_SCORE_THRESHOLD = 50
-const MAX_COMMENTS_PER_POST = 5
-
-interface RedditPost {
-    data: {
-        id: string
-        title: string
-        selftext: string
-        subreddit: string
-        score: number
-        num_comments: number
-        created_utc: number
-        permalink: string
-        author: string
-        url: string
-        is_self: boolean
-        over_18: boolean
-    }
+interface RSSItem {
+    title: string
+    link: string
+    content: string
+    id: string
+    published: string
+    author?: string
 }
 
-interface RedditComment {
-    data: {
-        id: string
-        body: string
-        score: number
-        created_utc: number
-        author: string
-        link_id: string
-        parent_id: string
-    }
-}
-
-interface RedditListingResponse {
-    data: {
-        children: RedditPost[]
-        after: string | null
-    }
-}
-
-interface RedditCommentsResponse {
-    data: {
-        children: RedditComment[]
-    }
-}
-
-export class RedditIngestionClient {
+export class RedditRSSClient {
     private userAgent: string
-    private baseUrl = 'https://oauth.reddit.com'
-    private accessToken: string | null = null
-    private tokenExpiry: number = 0
 
     constructor() {
         this.userAgent = process.env.REDDIT_USER_AGENT || 'MatchPulse/0.1'
     }
 
     /**
-     * Get OAuth access token for Reddit API
-     */
-    private async getAccessToken(): Promise<string> {
-        // Return cached token if still valid
-        if (this.accessToken && Date.now() < this.tokenExpiry) {
-            return this.accessToken
-        }
-
-        const clientId = process.env.REDDIT_CLIENT_ID
-        const clientSecret = process.env.REDDIT_CLIENT_SECRET
-
-        if (!clientId || !clientSecret) {
-            throw new Error('REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET are required')
-        }
-
-        const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
-
-        const response = await fetch('https://www.reddit.com/api/v1/access_token', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Basic ${auth}`,
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'User-Agent': this.userAgent
-            },
-            body: 'grant_type=client_credentials'
-        })
-
-        if (!response.ok) {
-            const error = await response.text()
-            throw new Error(`Reddit auth error: ${response.status} - ${error}`)
-        }
-
-        const data = await response.json()
-        this.accessToken = data.access_token
-        this.tokenExpiry = Date.now() + (data.expires_in - 60) * 1000 // Subtract 60s for safety
-
-        return this.accessToken!
-    }
-
-    /**
-     * Make authenticated request to Reddit API
-     */
-    private async fetchReddit(endpoint: string): Promise<unknown> {
-        const token = await this.getAccessToken()
-
-        const response = await fetch(`${this.baseUrl}${endpoint}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'User-Agent': this.userAgent
-            }
-        })
-
-        if (!response.ok) {
-            const error = await response.text()
-            throw new Error(`Reddit API error: ${response.status} - ${error}`)
-        }
-
-        // Handle rate limiting
-        const remaining = response.headers.get('x-ratelimit-remaining')
-        if (remaining && parseInt(remaining) < 10) {
-            const reset = response.headers.get('x-ratelimit-reset')
-            if (reset) {
-                console.log(`  ⏳ Rate limit approaching, waiting ${reset}s`)
-                await new Promise(resolve => setTimeout(resolve, parseInt(reset) * 1000))
-            }
-        }
-
-        return response.json()
-    }
-
-    /**
-     * Run the full Reddit ingestion job
+     * Run the full Reddit RSS ingestion job
      */
     async runIngestion(): Promise<{ processed: number; ingested: number }> {
-        console.log('🤖 Starting Reddit ingestion...')
+        console.log('🤖 Starting Reddit RSS ingestion...')
 
         // Create ingestion run record
         const run = await prisma.ingestionRun.create({
@@ -173,25 +57,18 @@ export class RedditIngestionClient {
 
             // Iterate through subreddits
             for (const subreddit of SUBREDDITS) {
-                if (totalProcessed >= MAX_POSTS_PER_DAY) {
-                    console.log(`  ⚠️ Reached daily limit of ${MAX_POSTS_PER_DAY} posts`)
-                    break
-                }
-
-                console.log(`  📝 Fetching from r/${subreddit}`)
+                console.log(`  📝 Fetching RSS from r/${subreddit}`)
 
                 try {
-                    // Fetch new posts
-                    const { processed, ingested } = await this.fetchSubredditPosts(
-                        subreddit,
-                        MAX_POSTS_PER_DAY - totalProcessed
-                    )
-
+                    const { processed, ingested } = await this.fetchSubredditRSS(subreddit)
                     totalProcessed += processed
                     totalIngested += ingested
                 } catch (error) {
                     console.error(`  ❌ Error fetching r/${subreddit}:`, error)
                 }
+
+                // Small delay between requests to be polite
+                await new Promise(resolve => setTimeout(resolve, 1000))
             }
 
             // Update run record
@@ -205,7 +82,7 @@ export class RedditIngestionClient {
                 }
             })
 
-            console.log(`✅ Reddit ingestion complete: ${totalIngested}/${totalProcessed} items ingested`)
+            console.log(`✅ Reddit RSS ingestion complete: ${totalIngested}/${totalProcessed} items ingested`)
             return { processed: totalProcessed, ingested: totalIngested }
 
         } catch (error) {
@@ -223,107 +100,120 @@ export class RedditIngestionClient {
     }
 
     /**
-     * Fetch posts from a subreddit
+     * Fetch posts from a subreddit's RSS feed
      */
-    private async fetchSubredditPosts(
-        subreddit: string,
-        maxPosts: number
+    private async fetchSubredditRSS(
+        subreddit: string
     ): Promise<{ processed: number; ingested: number }> {
-        const limit = Math.min(maxPosts, MAX_POSTS_PER_SUBREDDIT)
+        const url = `https://www.reddit.com/r/${subreddit}/new.rss`
 
-        // Fetch new posts (last 24 hours of "hot" and "new")
-        const [hotPosts, newPosts] = await Promise.all([
-            this.fetchReddit(`/r/${subreddit}/hot?limit=${Math.floor(limit / 2)}`),
-            this.fetchReddit(`/r/${subreddit}/new?limit=${Math.floor(limit / 2)}`)
-        ])
+        const response = await fetch(url, {
+            headers: {
+                'User-Agent': this.userAgent
+            }
+        })
 
-        const allPosts = [
-            ...((hotPosts as RedditListingResponse).data?.children || []),
-            ...((newPosts as RedditListingResponse).data?.children || [])
-        ]
-
-        // Deduplicate by ID
-        const uniquePosts = new Map<string, RedditPost>()
-        for (const post of allPosts) {
-            uniquePosts.set(post.data.id, post)
+        if (!response.ok) {
+            throw new Error(`RSS fetch failed: ${response.status}`)
         }
+
+        const xml = await response.text()
+        const items = this.parseRSS(xml, subreddit)
 
         let processed = 0
         let ingested = 0
 
-        for (const post of Array.from(uniquePosts.values())) {
+        for (const item of items.slice(0, MAX_POSTS_PER_SUBREDDIT)) {
             processed++
 
-            try {
-                const wasIngested = await this.ingestPost(post)
-                if (wasIngested) {
-                    ingested++
-
-                    // Fetch comments for high-score posts
-                    if (FETCH_COMMENTS && post.data.score >= COMMENT_SCORE_THRESHOLD) {
-                        const commentResult = await this.fetchAndIngestComments(
-                            subreddit,
-                            post.data.id
-                        )
-                        processed += commentResult.processed
-                        ingested += commentResult.ingested
-                    }
-                }
-            } catch (error) {
-                console.error(`  ❌ Error ingesting post ${post.data.id}:`, error)
-            }
+            const wasIngested = await this.ingestItem(item, subreddit)
+            if (wasIngested) ingested++
         }
 
         return { processed, ingested }
     }
 
     /**
-     * Fetch and ingest top comments for a post
+     * Parse RSS XML into structured items
      */
-    private async fetchAndIngestComments(
-        subreddit: string,
-        postId: string
-    ): Promise<{ processed: number; ingested: number }> {
-        try {
-            const response = await this.fetchReddit(
-                `/r/${subreddit}/comments/${postId}?limit=${MAX_COMMENTS_PER_POST}&sort=top`
-            )
+    private parseRSS(xml: string, subreddit: string): RSSItem[] {
+        const items: RSSItem[] = []
 
-            // Reddit returns an array: [post, comments]
-            const commentsData = (response as RedditCommentsResponse[])[1]
-            const comments = commentsData?.data?.children || []
+        // Simple regex-based XML parsing for RSS entries
+        const entryRegex = /<entry>([\s\S]*?)<\/entry>/g
+        let match
 
-            let processed = 0
-            let ingested = 0
+        while ((match = entryRegex.exec(xml)) !== null) {
+            const entry = match[1]
 
-            for (const comment of comments) {
-                if (comment.data?.body && comment.data.body !== '[deleted]') {
-                    processed++
-                    const wasIngested = await this.ingestComment(comment, subreddit)
-                    if (wasIngested) ingested++
-                }
+            const title = this.extractTag(entry, 'title')
+            const link = this.extractAttribute(entry, 'link', 'href')
+            const content = this.extractTag(entry, 'content') || this.extractTag(entry, 'summary')
+            const id = this.extractTag(entry, 'id')
+            const published = this.extractTag(entry, 'published') || this.extractTag(entry, 'updated')
+            const author = this.extractTag(entry, 'name') || undefined // Author name is in <author><name>
+
+            if (title && id) {
+                items.push({
+                    title: this.decodeHTML(title),
+                    link: link || `https://www.reddit.com/r/${subreddit}`,
+                    content: content ? this.decodeHTML(this.stripHTML(content)) : '',
+                    id,
+                    published: published || new Date().toISOString(),
+                    author
+                })
             }
-
-            return { processed, ingested }
-        } catch (error) {
-            console.error(`  ❌ Error fetching comments for ${postId}:`, error)
-            return { processed: 0, ingested: 0 }
         }
+
+        return items
     }
 
     /**
-     * Ingest a single post into the database
+     * Extract content from an XML tag
      */
-    private async ingestPost(post: RedditPost): Promise<boolean> {
-        const { data } = post
+    private extractTag(xml: string, tagName: string): string | null {
+        const regex = new RegExp(`<${tagName}[^>]*>([\\s\\S]*?)<\\/${tagName}>`, 'i')
+        const match = regex.exec(xml)
+        return match ? match[1].trim() : null
+    }
 
-        // Skip NSFW content
-        if (data.over_18) return false
+    /**
+     * Extract an attribute value from a self-closing tag
+     */
+    private extractAttribute(xml: string, tagName: string, attrName: string): string | null {
+        const regex = new RegExp(`<${tagName}[^>]*${attrName}="([^"]*)"`, 'i')
+        const match = regex.exec(xml)
+        return match ? match[1] : null
+    }
 
-        // Skip deleted/removed posts
-        if (data.selftext === '[deleted]' || data.selftext === '[removed]') return false
+    /**
+     * Decode HTML entities
+     */
+    private decodeHTML(text: string): string {
+        return text
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&amp;/g, '&')
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'")
+            .replace(/&nbsp;/g, ' ')
+    }
 
-        const sourceId = `reddit_post_${data.id}`
+    /**
+     * Strip HTML tags from content
+     */
+    private stripHTML(html: string): string {
+        return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+    }
+
+    /**
+     * Ingest a single RSS item into the database
+     */
+    private async ingestItem(item: RSSItem, subreddit: string): Promise<boolean> {
+        // Extract post ID from the Reddit ID format (t3_xxxxx)
+        const idMatch = item.id.match(/t3_([a-z0-9]+)/i)
+        const postId = idMatch ? idMatch[1] : item.id
+        const sourceId = `reddit_post_${postId}`
 
         // Check if already exists
         const existing = await prisma.contentItem.findUnique({
@@ -332,11 +222,22 @@ export class RedditIngestionClient {
 
         if (existing) return false
 
-        // Build body text from title + selftext
-        const bodyText = `${data.title} ${data.selftext || ''}`.trim()
+        // Build body text from title + content
+        const bodyText = `${item.title} ${item.content}`.trim()
 
         // Skip very short content
         if (bodyText.length < 15) return false
+
+        // Parse published date
+        let publishedAt: Date
+        try {
+            publishedAt = new Date(item.published)
+            if (isNaN(publishedAt.getTime())) {
+                publishedAt = new Date()
+            }
+        } catch {
+            publishedAt = new Date()
+        }
 
         // Create content item
         await prisma.contentItem.create({
@@ -344,61 +245,15 @@ export class RedditIngestionClient {
                 sourcePlatform: 'reddit',
                 sourceType: 'reddit_post',
                 sourceId,
-                title: data.title,
+                title: item.title,
                 bodyText,
-                publishedAt: new Date(data.created_utc * 1000),
+                publishedAt,
                 language: 'en', // Assume English for now
                 metadata: {
-                    subreddit: data.subreddit,
-                    score: data.score,
-                    numComments: data.num_comments,
-                    author: data.author,
-                    permalink: `https://reddit.com${data.permalink}`,
-                    url: data.url,
-                    isSelf: data.is_self
-                }
-            }
-        })
-
-        return true
-    }
-
-    /**
-     * Ingest a single comment into the database
-     */
-    private async ingestComment(comment: RedditComment, subreddit: string): Promise<boolean> {
-        const { data } = comment
-
-        const sourceId = `reddit_comment_${data.id}`
-
-        // Check if already exists
-        const existing = await prisma.contentItem.findUnique({
-            where: { sourceId }
-        })
-
-        if (existing) return false
-
-        const bodyText = data.body.trim()
-
-        // Skip very short content
-        if (bodyText.length < 15) return false
-
-        // Create content item
-        await prisma.contentItem.create({
-            data: {
-                sourcePlatform: 'reddit',
-                sourceType: 'reddit_comment',
-                sourceId,
-                title: null,
-                bodyText,
-                publishedAt: new Date(data.created_utc * 1000),
-                language: 'en',
-                metadata: {
                     subreddit,
-                    score: data.score,
-                    author: data.author,
-                    linkId: data.link_id,
-                    parentId: data.parent_id
+                    author: item.author || 'unknown',
+                    permalink: item.link,
+                    source: 'rss'
                 }
             }
         })
@@ -408,9 +263,9 @@ export class RedditIngestionClient {
 }
 
 /**
- * Run Reddit ingestion as a standalone job
+ * Run Reddit RSS ingestion as a standalone job
  */
 export async function runRedditIngestion() {
-    const client = new RedditIngestionClient()
+    const client = new RedditRSSClient()
     return client.runIngestion()
 }
