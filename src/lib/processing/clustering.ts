@@ -9,7 +9,7 @@ import prisma from '@/lib/db'
 
 // Configuration
 const MIN_CLUSTER_SIZE = parseInt(process.env.MIN_CLUSTER_SIZE || '20')
-const SIMILARITY_THRESHOLD = 0.75
+const SIMILARITY_THRESHOLD = 0.65
 
 interface ContentWithEmbedding {
     id: string

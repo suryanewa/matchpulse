@@ -1,42 +1,128 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { opportunityCards, personas } from '@/data/mock-data'
+import { useState, useEffect, useMemo } from 'react'
 import { OpportunityCard } from '@/components/OpportunityCard'
 import { OpportunityCard as OpportunityType, OpportunityStatus, OpportunitySeverity } from '@/types'
 import { cn } from '@/lib/utils'
-import { Filter, LayoutGrid, List } from 'lucide-react'
+import { Filter, LayoutGrid, List, Loader2 } from 'lucide-react'
 import { StaggerContainer, StaggerItem } from '@/components/ui/MotionPrimitives'
 
 type ViewMode = 'grid' | 'list'
+
+interface ApiOpportunity {
+    id: string
+    title: string
+    problemStatement: string
+    signalsSummary: string
+    whyNow: string
+    status: OpportunityStatus
+    severity: OpportunitySeverity
+    confidence: number
+    notes: string | null
+    createdAt: string
+    updatedAt: string
+    clusters: Array<{ id: string; title: string; growthScore: number }>
+    personas: Array<{ id: string; name: string; emoji: string; color: string }>
+}
+
+interface ApiPersona {
+    id: string
+    name: string
+    emoji: string
+}
+
+function transformToOpportunity(api: ApiOpportunity): OpportunityType {
+    return {
+        id: api.id,
+        title: api.title,
+        problemStatement: api.problemStatement,
+        signalsSummary: api.signalsSummary,
+        whyNow: api.whyNow,
+        status: api.status,
+        severity: api.severity,
+        confidence: api.confidence,
+        personaIds: api.personas?.map(p => p.id) || [],
+        linkedTrendIds: api.clusters?.map(c => c.id) || [],
+        createdAt: api.createdAt,
+        updatedAt: api.updatedAt
+    }
+}
 
 export default function OpportunitiesPage() {
     const [viewMode, setViewMode] = useState<ViewMode>('list')
     const [statusFilter, setStatusFilter] = useState<OpportunityStatus | 'all'>('all')
     const [severityFilter, setSeverityFilter] = useState<OpportunitySeverity | 'all'>('all')
     const [personaFilter, setPersonaFilter] = useState<string>('all')
+    const [opportunities, setOpportunities] = useState<OpportunityType[]>([])
+    const [personas, setPersonas] = useState<ApiPersona[]>([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const [oppsRes, personasRes] = await Promise.all([
+                    fetch('/api/opportunities'),
+                    fetch('/api/personas')
+                ])
+
+                const oppsData = await oppsRes.json()
+                const personasData = await personasRes.json()
+
+                if (oppsData.success && oppsData.data) {
+                    setOpportunities(oppsData.data.map(transformToOpportunity))
+                }
+                if (personasData.success && personasData.data) {
+                    setPersonas(personasData.data.map((p: ApiPersona) => ({
+                        id: p.id,
+                        name: p.name,
+                        emoji: p.emoji
+                    })))
+                }
+            } catch (err) {
+                setError('Failed to fetch data')
+                console.error(err)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchData()
+    }, [])
 
     const filteredOpportunities = useMemo(() => {
-        return opportunityCards.filter(opp => {
+        return opportunities.filter(opp => {
             if (statusFilter !== 'all' && opp.status !== statusFilter) return false
             if (severityFilter !== 'all' && opp.severity !== severityFilter) return false
             if (personaFilter !== 'all' && !opp.personaIds.includes(personaFilter)) return false
             return true
         })
-    }, [statusFilter, severityFilter, personaFilter])
+    }, [opportunities, statusFilter, severityFilter, personaFilter])
 
     const statusCounts = useMemo(() => {
         return {
-            all: opportunityCards.length,
-            new: opportunityCards.filter(o => o.status === 'new').length,
-            reviewed: opportunityCards.filter(o => o.status === 'reviewed').length,
-            in_discovery: opportunityCards.filter(o => o.status === 'in_discovery').length,
-            not_relevant: opportunityCards.filter(o => o.status === 'not_relevant').length,
+            all: opportunities.length,
+            new: opportunities.filter(o => o.status === 'new').length,
+            reviewed: opportunities.filter(o => o.status === 'reviewed').length,
+            in_discovery: opportunities.filter(o => o.status === 'in_discovery').length,
+            not_relevant: opportunities.filter(o => o.status === 'not_relevant').length,
         }
-    }, [])
+    }, [opportunities])
 
-    const handleStatusChange = (id: string, newStatus: OpportunityStatus) => {
-        console.log('Status change not implemented for mock data', id, newStatus)
+    const handleStatusChange = async (id: string, newStatus: OpportunityStatus) => {
+        try {
+            const res = await fetch(`/api/opportunities/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            })
+            if (res.ok) {
+                setOpportunities(prev =>
+                    prev.map(o => o.id === id ? { ...o, status: newStatus } : o)
+                )
+            }
+        } catch (err) {
+            console.error('Failed to update status:', err)
+        }
     }
 
     return (
@@ -154,26 +240,47 @@ export default function OpportunitiesPage() {
                 Showing <span className="font-medium text-white">{filteredOpportunities.length}</span> opportunities
             </div>
 
+            {/* Loading State */}
+            {loading && (
+                <div className="flex items-center justify-center py-20">
+                    <Loader2 className="h-8 w-8 animate-spin text-pulse-500" />
+                </div>
+            )}
+
+            {/* Error State */}
+            {error && (
+                <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-6 text-center">
+                    <p className="text-red-300">{error}</p>
+                </div>
+            )}
+
             {/* Opportunities List/Grid */}
-            <StaggerContainer className={cn(
-                'grid gap-6',
-                viewMode === 'grid' ? 'md:grid-cols-2' : 'grid-cols-1'
-            )}>
-                {filteredOpportunities.map(opportunity => (
-                    <StaggerItem key={opportunity.id}>
-                        <OpportunityCard
-                            opportunity={opportunity}
-                            onStatusChange={handleStatusChange}
-                        />
-                    </StaggerItem>
-                ))}
-            </StaggerContainer>
+            {!loading && !error && (
+                <StaggerContainer className={cn(
+                    'grid gap-6',
+                    viewMode === 'grid' ? 'md:grid-cols-2' : 'grid-cols-1'
+                )}>
+                    {filteredOpportunities.map(opportunity => (
+                        <StaggerItem key={opportunity.id}>
+                            <OpportunityCard
+                                opportunity={opportunity}
+                                onStatusChange={handleStatusChange}
+                            />
+                        </StaggerItem>
+                    ))}
+                </StaggerContainer>
+            )}
+
             {/* Empty State */}
-            {filteredOpportunities.length === 0 && (
+            {!loading && !error && filteredOpportunities.length === 0 && (
                 <div className="flex flex-col items-center justify-center rounded-xl border border-surface-800 bg-surface-900/50 py-16">
                     <div className="text-4xl">🔍</div>
                     <h3 className="mt-4 text-lg font-semibold text-white">No opportunities found</h3>
-                    <p className="mt-1 text-surface-400">Try adjusting your filters</p>
+                    <p className="mt-1 text-surface-400">
+                        {opportunities.length === 0
+                            ? 'Run the pipeline to generate opportunities from behavior clusters'
+                            : 'Try adjusting your filters'}
+                    </p>
                 </div>
             )}
         </div>
