@@ -179,7 +179,7 @@ export default function PersonaDetailPage({ params }: PersonaDetailPageProps) {
                                 return (
                                     <Link
                                         key={trend.id}
-                                        href="/behaviors"
+                                        href={`/behaviors?trendId=${trend.id}`}
                                         className="flex items-center justify-between rounded-lg border border-surface-800 bg-surface-900 p-4 transition-colors hover:border-surface-700"
                                     >
                                         <div className="flex-1">
@@ -220,15 +220,29 @@ export default function PersonaDetailPage({ params }: PersonaDetailPageProps) {
                             <h2 className="font-semibold text-white">Representative Quotes</h2>
                         </div>
                         <div className="space-y-3">
-                            {persona.quotes.map((quote, i) => (
-                                <div
-                                    key={i}
-                                    className="rounded-lg border border-surface-800 bg-surface-900 p-4"
-                                >
-                                    <p className="text-surface-200 italic">&ldquo;{quote.text}&rdquo;</p>
-                                    <div className="mt-2 text-xs text-surface-500">via {quote.source}</div>
-                                </div>
-                            ))}
+                            {persona.quotes.map((quote, i) => {
+                                const QuoteWrapper = quote.url ? 'a' : 'div'
+                                const wrapperProps = quote.url ? {
+                                    href: quote.url,
+                                    target: '_blank',
+                                    rel: 'noopener noreferrer',
+                                    className: "block rounded-lg border border-surface-800 bg-surface-900 p-4 transition-all hover:border-surface-600 hover:bg-surface-800/80 group"
+                                } : {
+                                    className: "rounded-lg border border-surface-800 bg-surface-900 p-4"
+                                }
+
+                                return (
+                                    <QuoteWrapper key={i} {...(wrapperProps as any)}>
+                                        <div className="flex justify-between gap-2">
+                                            <p className="text-surface-200 italic flex-1">&ldquo;{quote.text}&rdquo;</p>
+                                            {quote.url && (
+                                                <ExternalLink className="h-3.5 w-3.5 shrink-0 text-surface-500 transition-colors group-hover:text-pulse-400" />
+                                            )}
+                                        </div>
+                                        <div className="mt-2 text-xs text-surface-500">via {quote.source}</div>
+                                    </QuoteWrapper>
+                                )
+                            })}
                         </div>
                     </div>
 

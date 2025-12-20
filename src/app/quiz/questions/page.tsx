@@ -4,7 +4,9 @@ import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { quizQuestions, calculateQuizResults } from '@/data/mock-data'
 import { cn } from '@/lib/utils'
-import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
 
 export default function QuizQuestionsPage() {
     const router = useRouter()
@@ -63,12 +65,30 @@ export default function QuizQuestionsPage() {
 
     return (
         <div className="flex min-h-screen flex-col bg-gradient-to-b from-surface-950 via-surface-900 to-surface-950">
+            {/* Back to Dashboard */}
+            <div className="border-b border-surface-800 px-6 py-3">
+                <div className="mx-auto max-w-2xl">
+                    <Link
+                        href="/behaviors"
+                        className="text-sm text-surface-500 hover:text-surface-300"
+                    >
+                        ← Back to Dashboard
+                    </Link>
+                </div>
+            </div>
+
             {/* Header */}
             <header className="border-b border-surface-800 px-6 py-4">
                 <div className="mx-auto flex max-w-2xl items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <Sparkles className="h-5 w-5 text-pulse-400" />
-                        <span className="font-semibold text-white">PersonaPulse</span>
+                        <Image
+                            src="/assets/MatchPulse Logo.svg"
+                            alt="MatchPulse Logo"
+                            width={20}
+                            height={20}
+                            className="h-5 w-5"
+                        />
+                        <span className="font-semibold text-white">MatchPulse</span>
                     </div>
                     <span className="text-sm text-surface-400">
                         Question {currentQuestionIndex + 1} of {quizQuestions.length}

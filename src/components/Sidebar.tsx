@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import {
@@ -9,12 +10,13 @@ import {
     Lightbulb,
     Sparkles,
     Settings,
-    HelpCircle
+    HelpCircle,
+    Info
 } from 'lucide-react'
 
 const navItems = [
     {
-        label: 'Rising Behaviors',
+        label: 'Behaviors',
         href: '/behaviors',
         icon: TrendingUp,
         description: 'Emerging dating trends',
@@ -44,6 +46,11 @@ const bottomNavItems = [
         href: '/help',
         icon: HelpCircle,
     },
+    {
+        label: 'About',
+        href: '/about',
+        icon: Info,
+    },
 ]
 
 export function Sidebar() {
@@ -53,10 +60,14 @@ export function Sidebar() {
         <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-surface-800 bg-surface-950">
             <div className="flex h-full flex-col">
                 {/* Logo */}
-                <div className="flex h-16 items-center gap-2 border-b border-surface-800 px-6">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-pulse-500 to-accent-500">
-                        <Sparkles className="h-5 w-5 text-white" />
-                    </div>
+                <div className="flex h-16 items-center gap-2.5 border-b border-surface-800 px-6">
+                    <Image
+                        src="/assets/MatchPulse Logo.svg"
+                        alt="MatchPulse Logo"
+                        width={32}
+                        height={32}
+                        className="h-8 w-8"
+                    />
                     <div>
                         <span className="text-lg font-bold text-white">MatchPulse</span>
                     </div>

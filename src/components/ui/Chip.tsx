@@ -2,9 +2,10 @@ import { cn } from '@/lib/utils'
 
 interface ChipProps {
     children: React.ReactNode
-    variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'outline'
+    variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'outline' | 'custom'
     size?: 'sm' | 'md'
     className?: string
+    style?: React.CSSProperties
 }
 
 const variantStyles = {
@@ -14,6 +15,7 @@ const variantStyles = {
     warning: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
     danger: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
     outline: 'bg-transparent text-surface-400 border-surface-600 hover:bg-surface-800/50 hover:text-surface-300',
+    custom: '', // No default styling - fully controlled by className/style
 }
 
 const sizeStyles = {
@@ -25,16 +27,18 @@ export function Chip({
     children,
     variant = 'default',
     size = 'sm',
-    className
+    className,
+    style
 }: ChipProps) {
     return (
         <span
             className={cn(
-                'inline-flex items-center rounded-full border font-medium transition-colors',
+                'inline-flex items-center rounded-full border font-bold uppercase tracking-wider transition-colors',
                 variantStyles[variant],
                 sizeStyles[size],
                 className
             )}
+            style={style}
         >
             {children}
         </span>

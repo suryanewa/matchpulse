@@ -1,126 +1,112 @@
 'use client'
 
 import { BehaviorTrend } from '@/types'
-import { Chip } from '@/components/ui/Chip'
 import { Sparkline } from '@/components/ui/Sparkline'
+import { Chip } from '@/components/ui/Chip'
 import { formatNumber, formatGrowth, cn } from '@/lib/utils'
-import { TrendingUp, Users, Bookmark, BookmarkCheck, ExternalLink } from 'lucide-react'
-import { useState } from 'react'
+import { TrendingUp, TrendingDown, Bookmark, BookmarkCheck } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { HoverCard } from '@/components/ui/MotionPrimitives'
+import { useState } from 'react'
+import { useDashboard } from '@/context/DashboardContext'
 
 interface BehaviorCardProps {
     trend: BehaviorTrend
-    onClick: (trend: BehaviorTrend) => void
+    onClick?: () => void
 }
 
 export function BehaviorCard({ trend, onClick }: BehaviorCardProps) {
-    const [isSaved, setIsSaved] = useState(false)
+    const { savedTrendIds, toggleSaveTrend } = useDashboard()
+    const isSaved = savedTrendIds.has(trend.id)
+    const isPositiveGrowth = trend.growthRate > 0
 
-    // Safely get platforms array
-    const platforms = trend.platforms || []
+    const handleSave = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        toggleSaveTrend(trend.id)
+    }
 
     return (
-        <HoverCard
-            onClick={() => onClick(trend)}
-            className="group relative cursor-pointer overflow-hidden rounded-xl border border-surface-800 bg-surface-900/50 p-5 transition-colors hover:border-surface-700 hover:bg-surface-900"
+        <motion.div
+            onClick={onClick}
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+            className={cn(
+                'group relative cursor-pointer overflow-hidden rounded-xl border border-surface-800 bg-surface-900/50 p-5 transition-colors',
+                'hover:border-surface-700 hover:bg-surface-900'
+            )}
         >
-            {/* Header */}
-            <div className="mb-4 flex items-start justify-between">
-                <div>
-                    <div className="flex items-center gap-2 mb-2">
-                        <Chip className={trend.growthRate > 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'} size="sm">
-                            {formatGrowth(trend.growthRate)}
-                        </Chip>
-                        <span className="text-xs text-surface-500">vs last 30d</span>
-                    </div>
-                    <motion.h3
-                        layoutId={`title-${trend.id}`}
-                        className="text-lg font-semibold text-white group-hover:text-pulse-300 transition-colors"
-                    >
-                        {trend.title}
-                    </motion.h3>
-                </div>
-                <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={(e) => {
-                        e.stopPropagation()
-                        setIsSaved(!isSaved)
-                    }}
-                    className={cn(
-                        'flex h-8 w-8 items-center justify-center rounded-full transition-colors',
-                        isSaved ? 'text-pulse-400' : 'text-surface-600 group-hover:text-surface-400'
-                    )}
-                >
-                    {isSaved ? <BookmarkCheck className="h-5 w-5" /> : <Bookmark className="h-5 w-5" />}
-                </motion.button>
+            {/* Save Button */}
+            <button
+                onClick={handleSave}
+                className={cn(
+                    'absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg border transition-all',
+                    isSaved
+                        ? 'border-pulse-500/50 bg-pulse-500/10 text-pulse-400'
+                        : 'border-transparent bg-surface-800/50 text-surface-500 opacity-0 group-hover:opacity-100 hover:text-white'
+                )}
+            >
+                {isSaved ? (
+                    <BookmarkCheck className="h-4 w-4" />
+                ) : (
+                    <Bookmark className="h-4 w-4" />
+                )}
+            </button>
+
+            {/* Growth Indicator */}
+            <div className={cn(
+                'mb-4 flex h-10 w-10 items-center justify-center rounded-lg',
+                isPositiveGrowth ? 'bg-emerald-500/20' : 'bg-rose-500/20'
+            )}>
+                {isPositiveGrowth ? (
+                    <TrendingUp className="h-5 w-5 text-emerald-400" />
+                ) : (
+                    <TrendingDown className="h-5 w-5 text-rose-400" />
+                )}
             </div>
 
-            {/* Description */}
+            {/* Title & Description */}
+            <h3 className="mb-2 font-semibold text-white line-clamp-2">
+                {trend.title}
+            </h3>
             <p className="mb-4 text-sm text-surface-400 line-clamp-2">
-                {trend.description || 'No description available'}
+                {trend.description}
             </p>
 
-            {/* Sparkline Area */}
-            <div className="mb-4 h-16 w-full">
+            {/* Sparkline */}
+            <div className="mb-4 h-12">
                 <Sparkline
-                    data={trend.sparklineData || []}
-                    color={trend.growthRate > 0 ? '#10b981' : '#ef4444'}
-                    height={64}
+                    data={trend.sparklineData}
+                    color={isPositiveGrowth ? '#10b981' : '#ef4444'}
+                    height={48}
                 />
             </div>
 
-            {/* Footer Stats */}
-            <div className="flex items-center justify-between border-t border-surface-800 pt-4">
-                <div className="flex items-center gap-4 text-sm">
-                    <div className="flex items-center gap-1.5">
-                        <Users className="h-4 w-4 text-surface-500" />
-                        <span className="font-medium text-white">{formatNumber(trend.mentionCount)}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                        <TrendingUp className="h-4 w-4 text-emerald-400" />
-                        <span className="font-medium text-white">High</span>
-                    </div>
+            {/* Stats */}
+            <div className="mb-4 flex items-center justify-between text-sm">
+                <div>
+                    <span className="text-surface-500">Mentions: </span>
+                    <span className="font-medium text-white">{formatNumber(trend.mentionCount)}</span>
                 </div>
-
-                {/* Platform Icons (mini) */}
-                <div className="flex -space-x-2">
-                    {platforms.slice(0, 3).map((p, i) => (
-                        <div
-                            key={p.name || i}
-                            className="flex h-6 w-6 items-center justify-center rounded-full border border-surface-900 bg-surface-800 text-[10px] text-surface-400 ring-2 ring-surface-950"
-                            style={{ zIndex: 3 - i }}
-                        >
-                            {(p.name || 'U').charAt(0).toUpperCase()}
-                        </div>
-                    ))}
-                </div>
+                <Chip
+                    variant={isPositiveGrowth ? 'success' : 'danger'}
+                    size="sm"
+                >
+                    {formatGrowth(trend.growthRate)}
+                </Chip>
             </div>
 
-            {/* Linked Personas */}
-            {trend.linkedPersonas && trend.linkedPersonas.length > 0 && (
-                <div className="flex items-center gap-2 border-t border-surface-800 pt-4 mt-4">
-                    <span className="text-xs text-surface-500">Personas:</span>
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                        {(Array.isArray(trend.linkedPersonas) ? trend.linkedPersonas : []).slice(0, 3).map((persona, i) => (
-                            <div
-                                key={typeof persona === 'string' ? persona : i}
-                                className="flex items-center gap-1 rounded-full bg-surface-800 px-2 py-0.5"
-                            >
-                                <span className="text-xs text-surface-300">
-                                    {typeof persona === 'string' ? persona : 'Unknown'}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* Hover indicator */}
-            <div className="absolute bottom-4 right-4 opacity-0 transition-opacity group-hover:opacity-100">
-                <ExternalLink className="h-4 w-4 text-surface-500" />
+            {/* Top Phrases */}
+            <div className="flex flex-wrap gap-1">
+                {trend.topPhrases.slice(0, 3).map((phrase) => (
+                    <Chip key={phrase} variant="outline" size="sm">
+                        {phrase}
+                    </Chip>
+                ))}
+                {trend.topPhrases.length > 3 && (
+                    <Chip variant="outline" size="sm">
+                        +{trend.topPhrases.length - 3}
+                    </Chip>
+                )}
             </div>
-        </HoverCard>
+        </motion.div>
     )
 }

@@ -1,286 +1,127 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState } from 'react'
 import { OpportunityCard } from '@/components/OpportunityCard'
-import { OpportunityCard as OpportunityType, OpportunityStatus, OpportunitySeverity } from '@/types'
-import { cn } from '@/lib/utils'
-import { Filter, LayoutGrid, List, Loader2 } from 'lucide-react'
-import { StaggerContainer, StaggerItem } from '@/components/ui/MotionPrimitives'
-
-type ViewMode = 'grid' | 'list'
-
-interface ApiOpportunity {
-    id: string
-    title: string
-    problemStatement: string
-    signalsSummary: string
-    whyNow: string
-    status: OpportunityStatus
-    severity: OpportunitySeverity
-    confidence: number
-    notes: string | null
-    createdAt: string
-    updatedAt: string
-    clusters: Array<{ id: string; title: string; growthScore: number }>
-    personas: Array<{ id: string; name: string; emoji: string; color: string }>
-}
-
-interface ApiPersona {
-    id: string
-    name: string
-    emoji: string
-}
-
-function transformToOpportunity(api: ApiOpportunity): OpportunityType {
-    return {
-        id: api.id,
-        title: api.title,
-        problemStatement: api.problemStatement,
-        signalsSummary: api.signalsSummary,
-        whyNow: api.whyNow,
-        status: api.status,
-        severity: api.severity,
-        confidence: api.confidence,
-        personaIds: api.personas?.map(p => p.id) || [],
-        linkedTrendIds: api.clusters?.map(c => c.id) || [],
-        createdAt: api.createdAt,
-        updatedAt: api.updatedAt
-    }
-}
+import { opportunityCards, personas } from '@/data/mock-data'
+import { motion } from 'framer-motion'
+import { Lightbulb, Filter, Search, ChevronDown } from 'lucide-react'
+import { useDashboard } from '@/context/DashboardContext'
 
 export default function OpportunitiesPage() {
-    const [viewMode, setViewMode] = useState<ViewMode>('list')
-    const [statusFilter, setStatusFilter] = useState<OpportunityStatus | 'all'>('all')
-    const [severityFilter, setSeverityFilter] = useState<OpportunitySeverity | 'all'>('all')
-    const [personaFilter, setPersonaFilter] = useState<string>('all')
-    const [opportunities, setOpportunities] = useState<OpportunityType[]>([])
-    const [personas, setPersonas] = useState<ApiPersona[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    const [searchQuery, setSearchQuery] = useState('')
+    const [statusFilter, setStatusFilter] = useState<string>('all')
+    const [severityFilter, setSeverityFilter] = useState<string>('all')
+    const { timeFilter } = useDashboard()
 
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                const [oppsRes, personasRes] = await Promise.all([
-                    fetch('/api/opportunities'),
-                    fetch('/api/personas')
-                ])
-
-                const oppsData = await oppsRes.json()
-                const personasData = await personasRes.json()
-
-                if (oppsData.success && oppsData.data) {
-                    setOpportunities(oppsData.data.map(transformToOpportunity))
-                }
-                if (personasData.success && personasData.data) {
-                    setPersonas(personasData.data.map((p: ApiPersona) => ({
-                        id: p.id,
-                        name: p.name,
-                        emoji: p.emoji
-                    })))
-                }
-            } catch (err) {
-                setError('Failed to fetch data')
-                console.error(err)
-            } finally {
-                setLoading(false)
-            }
-        }
-        fetchData()
-    }, [])
-
-    const filteredOpportunities = useMemo(() => {
-        return opportunities.filter(opp => {
-            if (statusFilter !== 'all' && opp.status !== statusFilter) return false
-            if (severityFilter !== 'all' && opp.severity !== severityFilter) return false
-            if (personaFilter !== 'all' && !opp.personaIds.includes(personaFilter)) return false
-            return true
+    const filteredOpportunities = opportunityCards
+        .filter(opp => {
+            const matchesSearch =
+                opp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                opp.problemStatement.toLowerCase().includes(searchQuery.toLowerCase())
+            const matchesStatus = statusFilter === 'all' || opp.status === statusFilter
+            const matchesSeverity = severityFilter === 'all' || opp.severity === severityFilter
+            return matchesSearch && matchesStatus && matchesSeverity
         })
-    }, [opportunities, statusFilter, severityFilter, personaFilter])
+        .sort((a, b) => {
+            // Sort by severity: critical > high > medium > low
+            const severityOrder = { critical: 4, high: 3, medium: 2, low: 1 }
+            return (severityOrder[b.severity] || 0) - (severityOrder[a.severity] || 0)
+        })
 
-    const statusCounts = useMemo(() => {
-        return {
-            all: opportunities.length,
-            new: opportunities.filter(o => o.status === 'new').length,
-            reviewed: opportunities.filter(o => o.status === 'reviewed').length,
-            in_discovery: opportunities.filter(o => o.status === 'in_discovery').length,
-            not_relevant: opportunities.filter(o => o.status === 'not_relevant').length,
-        }
-    }, [opportunities])
-
-    const handleStatusChange = async (id: string, newStatus: OpportunityStatus) => {
-        try {
-            const res = await fetch(`/api/opportunities/${id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: newStatus })
-            })
-            if (res.ok) {
-                setOpportunities(prev =>
-                    prev.map(o => o.id === id ? { ...o, status: newStatus } : o)
-                )
-            }
-        } catch (err) {
-            console.error('Failed to update status:', err)
-        }
+    // Get persona names for display
+    const getPersonaName = (id: string) => {
+        const persona = personas.find(p => p.id === id)
+        return persona ? `${persona.emoji} ${persona.name}` : id
     }
 
     return (
         <div className="space-y-6">
             {/* Page Header */}
-            <div className="flex items-end justify-between">
+            <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-white">Product Opportunities</h1>
-                    <p className="mt-1 text-surface-400">
-                        AI-generated product ideas based on cultural trends and personas
+                    <h1 className="text-2xl font-semibold text-white flex items-center gap-2">
+                        <Lightbulb className="h-6 w-6 text-amber-500" />
+                        Product Opportunities
+                    </h1>
+                    <p className="mt-1 text-sm text-surface-400">
+                        Data-driven feature ideas from behavioral signals
                     </p>
                 </div>
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => setViewMode('grid')}
-                        className={cn(
-                            'flex h-9 w-9 items-center justify-center rounded-lg border transition-colors',
-                            viewMode === 'grid'
-                                ? 'border-pulse-500/50 bg-pulse-500/10 text-pulse-400'
-                                : 'border-surface-700 text-surface-400 hover:bg-surface-800 hover:text-white'
-                        )}
-                    >
-                        <LayoutGrid className="h-4 w-4" />
-                    </button>
-                    <button
-                        onClick={() => setViewMode('list')}
-                        className={cn(
-                            'flex h-9 w-9 items-center justify-center rounded-lg border transition-colors',
-                            viewMode === 'list'
-                                ? 'border-pulse-500/50 bg-pulse-500/10 text-pulse-400'
-                                : 'border-surface-700 text-surface-400 hover:bg-surface-800 hover:text-white'
-                        )}
-                    >
-                        <List className="h-4 w-4" />
-                    </button>
+                <span className="text-sm text-surface-400">
+                    {filteredOpportunities.length} opportunities
+                </span>
+            </div>
+
+            {/* Filters */}
+            <div className="flex flex-col md:flex-row md:items-center gap-4">
+                <div className="relative flex-1 max-w-md">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-500" />
+                    <input
+                        type="text"
+                        placeholder="Search opportunities..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2.5 bg-surface-900 border border-surface-700 rounded-xl text-sm text-white placeholder:text-surface-500 transition-all focus:outline-none focus:border-primary-500/50 focus:ring-4 focus:ring-primary-500/5"
+                    />
+                </div>
+                <div className="flex items-center gap-3">
+                    <div className="relative group/select">
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            className="appearance-none bg-surface-900 border border-surface-700 rounded-xl pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-primary-500/50 focus:ring-4 focus:ring-primary-500/5 transition-all cursor-pointer min-w-[140px]"
+                        >
+                            <option value="all">All Status</option>
+                            <option value="new">New</option>
+                            <option value="reviewed">Reviewed</option>
+                            <option value="in_discovery">In Discovery</option>
+                            <option value="discarded">Discarded</option>
+                        </select>
+                        <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-500 pointer-events-none group-hover/select:text-surface-300 transition-colors" />
+                    </div>
+
+                    <div className="relative group/select">
+                        <select
+                            value={severityFilter}
+                            onChange={(e) => setSeverityFilter(e.target.value)}
+                            className="appearance-none bg-surface-900 border border-surface-700 rounded-xl pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-primary-500/50 focus:ring-4 focus:ring-primary-500/5 transition-all cursor-pointer min-w-[140px]"
+                        >
+                            <option value="all">All Severity</option>
+                            <option value="critical">Critical</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                        <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-500 pointer-events-none group-hover/select:text-surface-300 transition-colors" />
+                    </div>
                 </div>
             </div>
 
-            {/* Status Tabs */}
-            <div className="flex gap-1 rounded-lg bg-surface-900 p-1">
-                {(['all', 'new', 'reviewed', 'in_discovery', 'not_relevant'] as const).map((status) => (
-                    <button
-                        key={status}
-                        onClick={() => setStatusFilter(status)}
-                        className={cn(
-                            'flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors',
-                            statusFilter === status
-                                ? 'bg-surface-800 text-white'
-                                : 'text-surface-400 hover:text-white'
-                        )}
+            {/* Opportunity Cards */}
+            <motion.div
+                className="space-y-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+            >
+                {filteredOpportunities.map((opportunity, index) => (
+                    <motion.div
+                        key={opportunity.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
                     >
-                        {status === 'all' ? 'All' : status.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}
-                        <span className={cn(
-                            'rounded-full px-2 py-0.5 text-xs',
-                            statusFilter === status ? 'bg-surface-700' : 'bg-surface-800'
-                        )}>
-                            {statusCounts[status]}
-                        </span>
-                    </button>
+                        <OpportunityCard
+                            opportunity={opportunity}
+                            timeFilter={timeFilter}
+                        />
+                    </motion.div>
                 ))}
-            </div>
+            </motion.div>
 
-            {/* Filters Bar */}
-            <div className="flex flex-wrap items-center gap-4 rounded-xl border border-surface-800 bg-surface-900/50 p-4">
-                <div className="flex items-center gap-2">
-                    <Filter className="h-4 w-4 text-surface-500" />
-                    <span className="text-sm text-surface-500">Filters:</span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                    <span className="text-sm text-surface-400">Severity:</span>
-                    <select
-                        value={severityFilter}
-                        onChange={(e) => setSeverityFilter(e.target.value as OpportunitySeverity | 'all')}
-                        className="rounded-lg border border-surface-700 bg-surface-800 px-3 py-1.5 text-sm text-white focus:border-pulse-500 focus:outline-none"
-                    >
-                        <option value="all">All</option>
-                        <option value="critical">Critical</option>
-                        <option value="high">High</option>
-                        <option value="medium">Medium</option>
-                        <option value="low">Low</option>
-                    </select>
-                </div>
-
-                <div className="flex items-center gap-2">
-                    <span className="text-sm text-surface-400">Persona:</span>
-                    <select
-                        value={personaFilter}
-                        onChange={(e) => setPersonaFilter(e.target.value)}
-                        className="rounded-lg border border-surface-700 bg-surface-800 px-3 py-1.5 text-sm text-white focus:border-pulse-500 focus:outline-none"
-                    >
-                        <option value="all">All Personas</option>
-                        {personas.map((p) => (
-                            <option key={p.id} value={p.id}>{p.emoji} {p.name}</option>
-                        ))}
-                    </select>
-                </div>
-
-                {(statusFilter !== 'all' || severityFilter !== 'all' || personaFilter !== 'all') && (
-                    <button
-                        onClick={() => {
-                            setStatusFilter('all')
-                            setSeverityFilter('all')
-                            setPersonaFilter('all')
-                        }}
-                        className="ml-auto text-sm text-pulse-400 hover:text-pulse-300"
-                    >
-                        Clear filters
-                    </button>
-                )}
-            </div>
-
-            {/* Results Count */}
-            <div className="text-sm text-surface-400">
-                Showing <span className="font-medium text-white">{filteredOpportunities.length}</span> opportunities
-            </div>
-
-            {/* Loading State */}
-            {loading && (
-                <div className="flex items-center justify-center py-20">
-                    <Loader2 className="h-8 w-8 animate-spin text-pulse-500" />
-                </div>
-            )}
-
-            {/* Error State */}
-            {error && (
-                <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-6 text-center">
-                    <p className="text-red-300">{error}</p>
-                </div>
-            )}
-
-            {/* Opportunities List/Grid */}
-            {!loading && !error && (
-                <StaggerContainer className={cn(
-                    'grid gap-6',
-                    viewMode === 'grid' ? 'md:grid-cols-2' : 'grid-cols-1'
-                )}>
-                    {filteredOpportunities.map(opportunity => (
-                        <StaggerItem key={opportunity.id}>
-                            <OpportunityCard
-                                opportunity={opportunity}
-                                onStatusChange={handleStatusChange}
-                            />
-                        </StaggerItem>
-                    ))}
-                </StaggerContainer>
-            )}
-
-            {/* Empty State */}
-            {!loading && !error && filteredOpportunities.length === 0 && (
-                <div className="flex flex-col items-center justify-center rounded-xl border border-surface-800 bg-surface-900/50 py-16">
-                    <div className="text-4xl">🔍</div>
-                    <h3 className="mt-4 text-lg font-semibold text-white">No opportunities found</h3>
-                    <p className="mt-1 text-surface-400">
-                        {opportunities.length === 0
-                            ? 'Run the pipeline to generate opportunities from behavior clusters'
-                            : 'Try adjusting your filters'}
-                    </p>
+            {filteredOpportunities.length === 0 && (
+                <div className="text-center py-12">
+                    <p className="text-surface-400">No opportunities found matching your filters.</p>
                 </div>
             )}
         </div>

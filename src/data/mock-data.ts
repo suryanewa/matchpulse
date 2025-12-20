@@ -3,8 +3,11 @@ import {
     Persona,
     BehaviorTrend,
     OpportunityCard,
-    QuizQuestion
+    QuizQuestion,
+    Notification
 } from '@/types'
+import personaQuotes from './persona-quotes.json'
+import trendPosts from './trend-posts.json'
 
 // ============================================
 // Content Sources
@@ -75,10 +78,7 @@ export const personas: Persona[] = [
             'Analysis paralysis on when to meet',
             'Ghosting triggers spiraling thoughts',
         ],
-        quotes: [
-            { text: 'I literally rewrite my texts 5 times before sending and still cringe', source: 'TikTok' },
-            { text: 'Does "haha" mean they\'re bored? Should I have said something funnier?', source: 'Reddit' },
-        ],
+        quotes: (personaQuotes as any)['overthinker'] || [],
         linkedTrendCount: 8,
         linkedOpportunityCount: 5,
     },
@@ -118,10 +118,7 @@ export const personas: Persona[] = [
             'App fatigue from swiping culture',
             'Feeling "too slow" for modern dating',
         ],
-        quotes: [
-            { text: 'I need at least 3 dates before I know if I even like someone', source: 'Reddit' },
-            { text: 'Everyone wants to be exclusive after one week, like slow down??', source: 'TikTok' },
-        ],
+        quotes: (personaQuotes as any)['slow-burner'] || [],
         linkedTrendCount: 6,
         linkedOpportunityCount: 4,
     },
@@ -161,10 +158,7 @@ export const personas: Persona[] = [
             'Finding others who can keep up',
             'Burnout from always initiating fun',
         ],
-        quotes: [
-            { text: 'My ideal first date is breaking into an abandoned building at midnight', source: 'TikTok' },
-            { text: 'If your opener is "hey" I\'m already asleep', source: 'Twitter' },
-        ],
+        quotes: (personaQuotes as any)['chaos-creative'] || [],
         linkedTrendCount: 7,
         linkedOpportunityCount: 3,
     },
@@ -204,10 +198,7 @@ export const personas: Persona[] = [
             'Balancing 1:1 time with social time',
             'Friends not approving of matches',
         ],
-        quotes: [
-            { text: 'If my friends don\'t like you, it\'s not gonna work. Sorry not sorry.', source: 'TikTok' },
-            { text: 'Group dates take the pressure off AND I get real vibes', source: 'Reddit' },
-        ],
+        quotes: (personaQuotes as any)['energy-extrovert'] || [],
         linkedTrendCount: 5,
         linkedOpportunityCount: 4,
     },
@@ -247,10 +238,7 @@ export const personas: Persona[] = [
             'Feeling naive for wanting romance',
             'Getting hurt by people "not looking for anything serious"',
         ],
-        quotes: [
-            { text: 'I know situationships are trendy but I need LABELS and COMMITMENT', source: 'TikTok' },
-            { text: 'Am I delusional for still believing in soulmates? Asking for myself.', source: 'Reddit' },
-        ],
+        quotes: (personaQuotes as any)['hopeful-romantic'] || [],
         linkedTrendCount: 9,
         linkedOpportunityCount: 6,
     },
@@ -290,10 +278,7 @@ export const personas: Persona[] = [
             'Wasting time on small talk',
             'Being seen as "too intense" for being direct',
         ],
-        quotes: [
-            { text: 'I ask about dealbreakers on date 1. Life is too short for surprises at month 6.', source: 'Reddit' },
-            { text: 'My dating app bio is basically a job listing and I\'m not sorry', source: 'TikTok' },
-        ],
+        quotes: (personaQuotes as any)['practical-matcher'] || [],
         linkedTrendCount: 4,
         linkedOpportunityCount: 3,
     },
@@ -303,7 +288,7 @@ export const personas: Persona[] = [
 // Helper: Generate sparkline data
 // ============================================
 
-function generateSparkline(baseValue: number, trend: 'up' | 'down' | 'stable', days: number = 30) {
+function generateSparkline(baseValue: number, trend: 'up' | 'down' | 'stable', volatility: number = 0.3, days: number = 30) {
     const data = []
     let value = baseValue
 
@@ -311,8 +296,8 @@ function generateSparkline(baseValue: number, trend: 'up' | 'down' | 'stable', d
         const date = new Date()
         date.setDate(date.getDate() - i)
 
-        const randomFactor = Math.random() * 0.3 - 0.15
-        const trendFactor = trend === 'up' ? 0.03 : trend === 'down' ? -0.02 : 0
+        const randomFactor = (Math.random() * volatility * 2) - volatility
+        const trendFactor = trend === 'up' ? 0.04 : trend === 'down' ? -0.03 : 0
         value = Math.max(0, value * (1 + trendFactor + randomFactor))
 
         data.push({
@@ -345,11 +330,7 @@ export const behaviorTrends: BehaviorTrend[] = [
         ],
         sparklineData: generateSparkline(800, 'up'),
         topPhrases: ['soft launch', 'hard launch', 'instagram official', 'cropped photo', 'mystery hand'],
-        representativePosts: [
-            { text: 'POV: you\'re deciding which body part to include in your soft launch', source: 'TikTok', engagement: 2400000 },
-            { text: 'the anxiety of deciding when to go from soft to hard launch is unreal', source: 'Reddit', engagement: 3200 },
-            { text: 'my soft launch was so subtle no one noticed 😭', source: 'Twitter', engagement: 45000 },
-        ],
+        representativePosts: (trendPosts as any)['soft-launching'] || [],
         linkedPersonas: [
             { personaId: 'energy-extrovert', confidence: 0.89 },
             { personaId: 'overthinker', confidence: 0.72 },
@@ -373,11 +354,7 @@ export const behaviorTrends: BehaviorTrend[] = [
         ],
         sparklineData: generateSparkline(2500, 'up'),
         topPhrases: ['double text', 'left on read', 'typing indicator', 'response time', 'seen no reply'],
-        representativePosts: [
-            { text: 'the typing bubble appearing and disappearing is my villain origin story', source: 'TikTok', engagement: 5800000 },
-            { text: 'I set timers to not reply too fast. We\'re all insane.', source: 'Reddit', engagement: 8900 },
-            { text: 'being left on read for 4 hours should be a felony', source: 'Twitter', engagement: 127000 },
-        ],
+        representativePosts: (trendPosts as any)['texting-anxiety'] || [],
         linkedPersonas: [
             { personaId: 'overthinker', confidence: 0.96 },
             { personaId: 'hopeful-romantic', confidence: 0.71 },
@@ -401,11 +378,7 @@ export const behaviorTrends: BehaviorTrend[] = [
         ],
         sparklineData: generateSparkline(4000, 'up'),
         topPhrases: ['situationship', 'define the relationship', 'what are we', 'no labels', 'almost relationship'],
-        representativePosts: [
-            { text: 'I\'m retiring from situationships effective immediately', source: 'TikTok', engagement: 12400000 },
-            { text: 'How do I escape a situationship when they won\'t have "the talk"', source: 'Reddit', engagement: 4200 },
-            { text: 'gen z invented situationships and now we\'re all in therapy for it', source: 'Twitter', engagement: 89000 },
-        ],
+        representativePosts: (trendPosts as any)['situationship-culture'] || [],
         linkedPersonas: [
             { personaId: 'hopeful-romantic', confidence: 0.92 },
             { personaId: 'practical-matcher', confidence: 0.78 },
@@ -427,13 +400,9 @@ export const behaviorTrends: BehaviorTrend[] = [
             { sourceId: 'reddit', percentage: 12 },
             { sourceId: 'twitter', percentage: 10 },
         ],
-        sparklineData: generateSparkline(1200, 'up'),
+        sparklineData: generateSparkline(1200, 'up', 0.4),
         topPhrases: ['delulu', 'manifest', 'he\'s my boyfriend he just doesn\'t know yet', 'signs from the universe', 'speaking it into existence'],
-        representativePosts: [
-            { text: 'delulu is the solulu (delusional is the solution)', source: 'TikTok', engagement: 8900000 },
-            { text: 'Is being delulu actually... working? I\'m confused and in love', source: 'Reddit', engagement: 2100 },
-            { text: 'manifested my crush texting me and it WORKED stay delulu besties', source: 'Twitter', engagement: 67000 },
-        ],
+        representativePosts: (trendPosts as any)['delulu-mindset'] || [],
         linkedPersonas: [
             { personaId: 'hopeful-romantic', confidence: 0.88 },
             { personaId: 'chaos-creative', confidence: 0.75 },
@@ -448,20 +417,16 @@ export const behaviorTrends: BehaviorTrend[] = [
         createdAt: new Date('2024-07-20'),
         updatedAt: new Date('2024-12-10'),
         mentionCount: 178300,
-        growthRate: 67,
+        growthRate: -15,
         sentimentScore: -0.1,
         platformBreakdown: [
             { sourceId: 'tiktok', percentage: 72 },
             { sourceId: 'reddit', percentage: 18 },
             { sourceId: 'twitter', percentage: 10 },
         ],
-        sparklineData: generateSparkline(3200, 'up'),
+        sparklineData: generateSparkline(3200, 'down', 0.35),
         topPhrases: ['got the ick', 'ick list', 'instant ick', 'can\'t unsee', 'deal breaker'],
-        representativePosts: [
-            { text: 'my ick is when they run to catch the train. Idk why.', source: 'TikTok', engagement: 4200000 },
-            { text: 'Are icks just avoidant attachment in disguise? Discuss.', source: 'Reddit', engagement: 5600 },
-            { text: 'got the ick because he said "yummy" while eating', source: 'Twitter', engagement: 234000 },
-        ],
+        representativePosts: (trendPosts as any)['ick-culture'] || [],
         linkedPersonas: [
             { personaId: 'overthinker', confidence: 0.69 },
             { personaId: 'chaos-creative', confidence: 0.61 },
@@ -485,11 +450,7 @@ export const behaviorTrends: BehaviorTrend[] = [
         ],
         sparklineData: generateSparkline(5500, 'stable'),
         topPhrases: ['app fatigue', 'deleting the apps', 'taking a break', 'swipe fatigue', 'talking stage exhaustion'],
-        representativePosts: [
-            { text: 'I\'ve been on 47 first dates this year and have nothing to show for it', source: 'Reddit', engagement: 12400 },
-            { text: 'deleting hinge for my mental health (again)', source: 'TikTok', engagement: 890000 },
-            { text: 'the apps have broken my brain and my will to live', source: 'Twitter', engagement: 156000 },
-        ],
+        representativePosts: (trendPosts as any)['date-draining'] || [],
         linkedPersonas: [
             { personaId: 'slow-burner', confidence: 0.84 },
             { personaId: 'hopeful-romantic', confidence: 0.79 },
@@ -511,13 +472,9 @@ export const behaviorTrends: BehaviorTrend[] = [
             { sourceId: 'reddit', percentage: 28 },
             { sourceId: 'twitter', percentage: 7 },
         ],
-        sparklineData: generateSparkline(1100, 'up'),
+        sparklineData: generateSparkline(1100, 'down', 0.4),
         topPhrases: ['roster', 'rotation', 'multi-dating', 'not exclusive yet', 'keeping options open'],
-        representativePosts: [
-            { text: 'normalize having a roster until someone earns exclusivity', source: 'TikTok', engagement: 3400000 },
-            { text: 'Am I wrong for feeling hurt that he\'s seeing others? We never had "the talk"', source: 'Reddit', engagement: 890 },
-            { text: 'my roster is 4 deep and I still feel single', source: 'Twitter', engagement: 45000 },
-        ],
+        representativePosts: (trendPosts as any)['roster-dating'] || [],
         linkedPersonas: [
             { personaId: 'practical-matcher', confidence: 0.76 },
             { personaId: 'chaos-creative', confidence: 0.68 },
@@ -532,20 +489,16 @@ export const behaviorTrends: BehaviorTrend[] = [
         createdAt: new Date('2024-04-20'),
         updatedAt: new Date('2024-12-05'),
         mentionCount: 145200,
-        growthRate: 23,
+        growthRate: -12,
         sentimentScore: -0.2,
         platformBreakdown: [
             { sourceId: 'tiktok', percentage: 71 },
             { sourceId: 'twitter', percentage: 19 },
             { sourceId: 'reddit', percentage: 10 },
         ],
-        sparklineData: generateSparkline(2800, 'stable'),
+        sparklineData: generateSparkline(2800, 'down', 0.3),
         topPhrases: ['sneaky link', 'late night text', 'no strings', 'keep it quiet', 'situationship vibes'],
-        representativePosts: [
-            { text: 'sneaky link upgraded to potential boyfriend?? growth', source: 'TikTok', engagement: 2100000 },
-            { text: 'I want to be someone\'s priority, not their sneaky link at 2am', source: 'Reddit', engagement: 3400 },
-            { text: 'the sneaky link to serious pipeline is REAL', source: 'Twitter', engagement: 78000 },
-        ],
+        representativePosts: (trendPosts as any)['sneaky-link'] || [],
         linkedPersonas: [
             { personaId: 'chaos-creative', confidence: 0.82 },
             { personaId: 'energy-extrovert', confidence: 0.45 },
@@ -569,11 +522,7 @@ export const behaviorTrends: BehaviorTrend[] = [
         ],
         sparklineData: generateSparkline(1500, 'up'),
         topPhrases: ['green flag', 'healthy communication', 'bare minimum or green flag?', 'actually a good sign', 'relationship goals'],
-        representativePosts: [
-            { text: 'him apologizing AND changing behavior is the biggest green flag', source: 'TikTok', engagement: 5600000 },
-            { text: 'We need to stop calling the bare minimum a green flag', source: 'Reddit', engagement: 7800 },
-            { text: 'green flag: he makes plans and actually follows through', source: 'Twitter', engagement: 112000 },
-        ],
+        representativePosts: (trendPosts as any)['green-flags'] || [],
         linkedPersonas: [
             { personaId: 'hopeful-romantic', confidence: 0.91 },
             { personaId: 'practical-matcher', confidence: 0.85 },
@@ -595,13 +544,9 @@ export const behaviorTrends: BehaviorTrend[] = [
             { sourceId: 'reddit', percentage: 42 },
             { sourceId: 'twitter', percentage: 10 },
         ],
-        sparklineData: generateSparkline(3200, 'stable'),
+        sparklineData: generateSparkline(3200, 'down', 0.25),
         topPhrases: ['talking stage', 'just talking', 'more than friends less than dating', 'going nowhere', 'stale conversation'],
-        representativePosts: [
-            { text: 'we\'ve been in the talking stage for 3 months. Are we just penpals?', source: 'TikTok', engagement: 1800000 },
-            { text: 'How do you escape the talking stage without scaring them off?', source: 'Reddit', engagement: 4500 },
-            { text: 'the talking stage should have a 2 week expiration date', source: 'Twitter', engagement: 89000 },
-        ],
+        representativePosts: (trendPosts as any)['talking-stage'] || [],
         linkedPersonas: [
             { personaId: 'practical-matcher', confidence: 0.88 },
             { personaId: 'slow-burner', confidence: 0.71 },
@@ -625,11 +570,7 @@ export const behaviorTrends: BehaviorTrend[] = [
         ],
         sparklineData: generateSparkline(600, 'up'),
         topPhrases: ['sober date', 'dry dating', 'no alcohol', 'coffee date', 'clear headed connection'],
-        representativePosts: [
-            { text: 'tried my first sober date and actually remembered the whole conversation', source: 'TikTok', engagement: 780000 },
-            { text: 'Sober dating changed my life. I actually know if I like them now.', source: 'Reddit', engagement: 2300 },
-            { text: 'hot take: if you need alcohol to have chemistry, there\'s no chemistry', source: 'Twitter', engagement: 156000 },
-        ],
+        representativePosts: (trendPosts as any)['sober-dating'] || [],
         linkedPersonas: [
             { personaId: 'slow-burner', confidence: 0.89 },
             { personaId: 'practical-matcher', confidence: 0.82 },
@@ -653,11 +594,7 @@ export const behaviorTrends: BehaviorTrend[] = [
         ],
         sparklineData: generateSparkline(4500, 'up'),
         topPhrases: ['ghosting', 'closure text', 'just say you\'re not interested', 'zombie-ing', 'orbiting'],
-        representativePosts: [
-            { text: 'sent my ghost a "I deserved a goodbye" text and honestly? Closure achieved.', source: 'TikTok', engagement: 3400000 },
-            { text: 'It takes 10 seconds to say "I\'m not feeling it." Why is everyone ghosting?', source: 'Reddit', engagement: 6700 },
-            { text: 'normalize rejection texts over ghosting challenge', source: 'Twitter', engagement: 234000 },
-        ],
+        representativePosts: (trendPosts as any)['ghosting-closure'] || [],
         linkedPersonas: [
             { personaId: 'overthinker', confidence: 0.93 },
             { personaId: 'hopeful-romantic', confidence: 0.86 },
@@ -685,8 +622,8 @@ export const opportunityCards: OpportunityCard[] = [
             topPhrases: ['typing indicator panic', 'when should I reply', 'overthinking texts'],
         },
         evidenceSnippets: [
-            { text: 'I wish there was a feature that helped me know when to text without looking desperate', source: 'Reddit' },
-            { text: 'someone needs to make a dating app for people with texting anxiety', source: 'TikTok' },
+            (personaQuotes as any)['overthinker'][1], // notes app draft
+            { text: 'someone needs to make a dating app for people with texting anxiety', source: 'TikTok', url: 'https://www.tiktok.com/@sabrina.zohar/video/7469201881810652447' },
         ],
         potentialDirections: [
             'Prompt packs with pre-written conversation starters based on profile context',
@@ -714,8 +651,8 @@ export const opportunityCards: OpportunityCard[] = [
             topPhrases: ['what are we', 'DTR', 'define the relationship', 'labels'],
         },
         evidenceSnippets: [
-            { text: 'Why isn\'t there a button to just ASK where this is going without making it weird?', source: 'TikTok' },
-            { text: 'Dating apps should have milestone tracking so we\'re on the same page', source: 'Reddit' },
+            (personaQuotes as any)['hopeful-romantic'][1], // labels and commitment
+            { text: 'Why isn\'t there a button to just ASK where this is going without making it weird?', source: 'TikTok', url: 'https://www.tiktok.com/@davisjourdan/video/7548515868754398477' },
         ],
         potentialDirections: [
             'Mutual "milestone check-ins" where both parties indicate readiness for next steps',
@@ -745,8 +682,8 @@ export const opportunityCards: OpportunityCard[] = [
             topPhrases: ['dry date', 'coffee date', 'activity date', 'no drinks'],
         },
         evidenceSnippets: [
-            { text: 'I need an app that specifically suggests non-drinking date ideas', source: 'Reddit' },
-            { text: 'Sober dating is the vibe but how do I suggest it without sounding boring?', source: 'TikTok' },
+            (personaQuotes as any)['slow-burner'][0], // slow burn intention
+            { text: 'Sober dating is the vibe but how do I suggest it without sounding boring?', source: 'TikTok', url: 'https://www.tiktok.com/@kdubschi/video/7576765062426250527' },
         ],
         potentialDirections: [
             'Activity-first date suggestions integrated into matching (mutual interests → date ideas)',
@@ -776,8 +713,8 @@ export const opportunityCards: OpportunityCard[] = [
             topPhrases: ['soft launch', 'hard launch', 'instagram official'],
         },
         evidenceSnippets: [
-            { text: 'An app that helps you plan your soft launch would be elite', source: 'TikTok' },
-            { text: 'I wish my dating app connected to IG for when I\'m ready to share', source: 'Twitter' },
+            { text: 'An app that helps you plan your soft launch would be elite', source: 'TikTok', url: 'https://www.tiktok.com/@madxmil/video/7399085132814011678' },
+            { text: 'I wish my dating app connected to IG for when I\'m ready to share', source: 'Twitter', url: 'https://x.com/sAnAyA1015/status/1959594421265076396' },
         ],
         potentialDirections: [
             'Graduation from dating app to "couples mode" with shareable content',
@@ -805,8 +742,8 @@ export const opportunityCards: OpportunityCard[] = [
             topPhrases: ['ghosting is cowardly', 'just tell me', 'closure'],
         },
         evidenceSnippets: [
-            { text: 'Dating apps should have a "not interested" button that sends a nice message for you', source: 'Reddit' },
-            { text: 'I\'d rather get rejected than ghosted any day', source: 'TikTok' },
+            (personaQuotes as any)['overthinker'][0], // thoughts every time I start talking
+            { text: 'I\'d rather get rejected than ghosted any day', source: 'TikTok', url: 'https://www.tiktok.com/@drshantesays/video/7575924110727990542' },
         ],
         potentialDirections: [
             'Pre-written kind rejection messages users can send with one tap',
@@ -834,8 +771,8 @@ export const opportunityCards: OpportunityCard[] = [
             topPhrases: ['group date', 'double date', 'friends need to approve', 'bring your bestie'],
         },
         evidenceSnippets: [
-            { text: 'Why isn\'t there a dating app where you swipe with your friends?', source: 'TikTok' },
-            { text: 'Group dates are so underrated for first meetings', source: 'Reddit' },
+            (personaQuotes as any)['energy-extrovert'][0], // friends don't like you
+            { text: 'Group dates are so underrated for first meetings', source: 'Reddit', url: 'https://www.reddit.com/r/AskReddit/comments/1b734k0/girls_what_is_the_greenest_flag_you_can_find_in_a/' },
         ],
         potentialDirections: [
             'Group date coordination features (match groups for activities)',
@@ -863,8 +800,8 @@ export const opportunityCards: OpportunityCard[] = [
             topPhrases: ['ick', 'dealbreaker', 'not gonna work', 'pet peeve'],
         },
         evidenceSnippets: [
-            { text: 'There should be a compatibility quiz for icks before you match', source: 'TikTok' },
-            { text: 'I want to know their icks before I catch feelings', source: 'Reddit' },
+            (personaQuotes as any)['practical-matcher'][1], // skip small talk
+            { text: 'I want to know their icks before I catch feelings', source: 'Reddit', url: 'https://www.reddit.com/r/AskWomen/comments/1kmr2t1/those_of_you_who_had_an_ick_with_someone_you_were/' },
         ],
         potentialDirections: [
             'Expanded compatibility questions including lifestyle preferences',
@@ -1059,3 +996,36 @@ export function calculateQuizResults(answers: Record<string, string>): { primary
 
     return { primary, secondary, scores }
 }
+
+// ============================================
+// Notifications
+// ============================================
+
+export const notifications: Notification[] = [
+    {
+        id: '1',
+        title: 'New Trend Detected',
+        description: '"Cozy Dating" is rising fast in Northern Europe.',
+        type: 'trend',
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+        isRead: false,
+        link: '/behaviors'
+    },
+    {
+        id: '2',
+        title: 'Persona Update',
+        description: 'The "Slow Burner" persona has 3 new linked trends.',
+        type: 'persona',
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5), // 5 hours ago
+        isRead: false,
+        link: '/personas'
+    },
+    {
+        id: '3',
+        title: 'System Insight',
+        description: 'Reddit engagement is up 45% for dating discussions.',
+        type: 'system',
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 24 hours ago
+        isRead: true
+    }
+]

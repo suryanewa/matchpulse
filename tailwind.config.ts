@@ -6,6 +6,21 @@ const config: Config = {
         './src/components/**/*.{js,ts,jsx,tsx,mdx}',
         './src/app/**/*.{js,ts,jsx,tsx,mdx}',
     ],
+    safelist: [
+        // Severity and Status chip colors - using patterns for reliability
+        {
+            pattern: /^bg-(red|orange|yellow|emerald|sky|violet|cyan|surface)-\d+/,
+            variants: [],
+        },
+        {
+            pattern: /^text-(red|orange|yellow|emerald|sky|violet|cyan|surface)-\d+/,
+            variants: [],
+        },
+        {
+            pattern: /^border-(red|orange|yellow|emerald|sky|violet|cyan|surface)-\d+/,
+            variants: [],
+        },
+    ],
     darkMode: 'class',
     theme: {
         extend: {

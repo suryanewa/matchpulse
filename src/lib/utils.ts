@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import type React from 'react'
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
@@ -53,22 +54,107 @@ export function getConfidenceColor(confidence: number): string {
     return 'text-rose-400'
 }
 
-export function getSeverityColor(severity: string): string {
+export type ChipColorResult = {
+    className: string;
+    style: React.CSSProperties;
+}
+
+export function getSeverityColor(severity: string): ChipColorResult {
     switch (severity) {
-        case 'critical': return 'bg-rose-500/20 text-rose-400 border-rose-500/30'
-        case 'high': return 'bg-orange-500/20 text-orange-400 border-orange-500/30'
-        case 'medium': return 'bg-amber-500/20 text-amber-400 border-amber-500/30'
-        case 'low': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-        default: return 'bg-surface-700 text-surface-300 border-surface-600'
+        case 'critical':
+            return {
+                className: '',
+                style: { backgroundColor: 'rgba(239, 68, 68, 0.2)', color: '#f87171', borderColor: 'rgba(239, 68, 68, 0.3)' }
+            }
+        case 'high':
+            return {
+                className: '',
+                style: { backgroundColor: 'rgba(249, 115, 22, 0.2)', color: '#fb923c', borderColor: 'rgba(249, 115, 22, 0.3)' }
+            }
+        case 'medium':
+            return {
+                className: '',
+                style: { backgroundColor: 'rgba(234, 179, 8, 0.2)', color: '#facc15', borderColor: 'rgba(234, 179, 8, 0.3)' }
+            }
+        case 'low':
+            return {
+                className: '',
+                style: { backgroundColor: 'rgba(16, 185, 129, 0.2)', color: '#34d399', borderColor: 'rgba(16, 185, 129, 0.3)' }
+            }
+        default:
+            return {
+                className: 'bg-surface-700 text-surface-300 border-surface-600',
+                style: {}
+            }
     }
 }
 
-export function getStatusColor(status: string): string {
+export function getStatusColor(status: string): ChipColorResult {
     switch (status) {
-        case 'new': return 'bg-blue-500/20 text-blue-400 border-blue-500/30'
-        case 'reviewed': return 'bg-purple-500/20 text-purple-400 border-purple-500/30'
-        case 'in_discovery': return 'bg-amber-500/20 text-amber-400 border-amber-500/30'
-        case 'not_relevant': return 'bg-surface-700 text-surface-400 border-surface-600'
-        default: return 'bg-surface-700 text-surface-300 border-surface-600'
+        case 'new':
+            return {
+                className: '',
+                style: { backgroundColor: 'rgba(14, 165, 233, 0.2)', color: '#38bdf8', borderColor: 'rgba(14, 165, 233, 0.3)' }
+            }
+        case 'reviewed':
+            return {
+                className: '',
+                style: { backgroundColor: 'rgba(139, 92, 246, 0.2)', color: '#a78bfa', borderColor: 'rgba(139, 92, 246, 0.3)' }
+            }
+        case 'in_discovery':
+            return {
+                className: '',
+                style: { backgroundColor: 'rgba(6, 182, 212, 0.2)', color: '#22d3ee', borderColor: 'rgba(6, 182, 212, 0.3)' }
+            }
+        case 'implemented':
+            return {
+                className: '',
+                style: { backgroundColor: 'rgba(16, 185, 129, 0.2)', color: '#34d399', borderColor: 'rgba(16, 185, 129, 0.3)' }
+            }
+        case 'not_relevant':
+            return {
+                className: 'bg-surface-700 text-surface-500 border-surface-600',
+                style: {}
+            }
+        default:
+            return {
+                className: 'bg-surface-700 text-surface-300 border-surface-600',
+                style: {}
+            }
+    }
+}
+
+// Time-based stats calculation for opportunities
+// Base values are for 'all' time, we scale down for shorter periods
+export type TimeFilter = '24h' | '7d' | '30d' | '12m' | 'all'
+
+export function getTimeBasedStats(
+    baseMentions: number,
+    baseGrowth: number,
+    timeFilter: TimeFilter
+): { mentions: number; growth: number } {
+    // Multipliers based on realistic data distribution over time
+    // Shorter time periods = fewer mentions but potentially higher growth %
+    const config = {
+        '24h': { mentionRatio: 0.008, growthMultiplier: 3.5 },   // ~0.8% of total, high recent volatility
+        '7d': { mentionRatio: 0.05, growthMultiplier: 2.0 },    // ~5% of total
+        '30d': { mentionRatio: 0.18, growthMultiplier: 1.0 },    // ~18% of total (base reference)
+        '12m': { mentionRatio: 0.75, growthMultiplier: 0.4 },    // ~75% of total, smoothed growth
+        'all': { mentionRatio: 1.0, growthMultiplier: 0.25 },    // 100%, most smoothed
+    }
+
+    const { mentionRatio, growthMultiplier } = config[timeFilter]
+
+    // Calculate scaled mentions (with some randomness for realism)
+    const scaledMentions = Math.round(baseMentions * mentionRatio)
+
+    // Growth is inverted - shorter periods show more volatility
+    // Also add slight variation based on mentions to make it feel dynamic
+    const variationFactor = 0.9 + (baseMentions % 10) / 50 // 0.9 to 1.1
+    const scaledGrowth = Math.round(baseGrowth * growthMultiplier * variationFactor)
+
+    return {
+        mentions: Math.max(scaledMentions, 1), // At least 1 mention
+        growth: scaledGrowth
     }
 }

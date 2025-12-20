@@ -3,9 +3,10 @@
 import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { getPersonaById } from '@/data/mock-data'
 import { cn } from '@/lib/utils'
-import { Sparkles, Share2, RotateCcw, ArrowRight, Download } from 'lucide-react'
+import { RotateCcw, ArrowRight } from 'lucide-react'
 import { StaggerContainer, StaggerItem } from '@/components/ui/MotionPrimitives'
 
 function QuizResultContent() {
@@ -26,12 +27,30 @@ function QuizResultContent() {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-surface-950 via-surface-900 to-surface-950">
+            {/* Back to Dashboard */}
+            <div className="border-b border-surface-800 px-6 py-3">
+                <div className="mx-auto max-w-2xl">
+                    <Link
+                        href="/behaviors"
+                        className="text-sm text-surface-500 hover:text-surface-300"
+                    >
+                        ← Back to Dashboard
+                    </Link>
+                </div>
+            </div>
+
             {/* Header */}
             <header className="border-b border-surface-800 px-6 py-4">
                 <div className="mx-auto flex max-w-2xl items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <Sparkles className="h-5 w-5 text-pulse-400" />
-                        <span className="font-semibold text-white">PersonaPulse</span>
+                        <Image
+                            src="/assets/MatchPulse Logo.svg"
+                            alt="MatchPulse Logo"
+                            width={20}
+                            height={20}
+                            className="h-5 w-5"
+                        />
+                        <span className="font-semibold text-white">MatchPulse</span>
                     </div>
                     <span className="text-sm text-surface-400">Your Results</span>
                 </div>
@@ -138,24 +157,18 @@ function QuizResultContent() {
                                 <p className="mb-4 text-sm text-white/80">
                                     {primaryPersona.tagline}
                                 </p>
-                                <div className="inline-flex items-center gap-1 rounded-full bg-white/20 px-3 py-1 text-xs text-white">
-                                    <Sparkles className="h-3 w-3" />
-                                    PersonaPulse
+                                <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs text-white">
+                                    <Image
+                                        src="/assets/MatchPulse Logo.svg"
+                                        alt="MatchPulse"
+                                        width={12}
+                                        height={12}
+                                        className="h-3 w-3"
+                                    />
+                                    MatchPulse
                                 </div>
                             </div>
                         </div>
-                    </StaggerItem>
-
-                    {/* Actions */}
-                    <StaggerItem className="flex flex-col gap-3 sm:flex-row">
-                        <button className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-surface-700 bg-surface-800 py-3 font-medium text-white transition-colors hover:bg-surface-700">
-                            <Share2 className="h-4 w-4" />
-                            Share Results
-                        </button>
-                        <button className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-surface-700 bg-surface-800 py-3 font-medium text-white transition-colors hover:bg-surface-700">
-                            <Download className="h-4 w-4" />
-                            Save Card
-                        </button>
                     </StaggerItem>
 
                     {/* Retake */}

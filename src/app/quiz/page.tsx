@@ -5,6 +5,18 @@ import { Sparkles, ArrowRight, Heart, Users, Zap } from 'lucide-react'
 export default function QuizLandingPage() {
     return (
         <div className="min-h-screen bg-gradient-to-b from-surface-950 via-surface-900 to-surface-950">
+            {/* Back to Dashboard Link */}
+            <div className="border-b border-surface-800 px-6 py-4">
+                <div className="mx-auto max-w-5xl">
+                    <Link
+                        href="/behaviors"
+                        className="text-sm text-surface-500 hover:text-surface-300"
+                    >
+                        ← Back to Dashboard
+                    </Link>
+                </div>
+            </div>
+
             {/* Hero Section */}
             <section className="relative overflow-hidden px-6 py-20">
                 {/* Background decorations */}
@@ -15,7 +27,7 @@ export default function QuizLandingPage() {
                     {/* Badge */}
                     <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-pulse-500/30 bg-pulse-500/10 px-4 py-1.5 text-sm text-pulse-300">
                         <Sparkles className="h-4 w-4" />
-                        PersonaPulse Quiz
+                        MatchPulse Quiz
                     </div>
 
                     {/* Main heading */}
@@ -135,18 +147,6 @@ export default function QuizLandingPage() {
                     </Link>
                 </div>
             </section>
-
-            {/* Back to Dashboard Link */}
-            <div className="border-t border-surface-800 px-6 py-4">
-                <div className="mx-auto max-w-5xl">
-                    <Link
-                        href="/behaviors"
-                        className="text-sm text-surface-500 hover:text-surface-300"
-                    >
-                        ← Back to Dashboard
-                    </Link>
-                </div>
-            </div>
         </div>
     )
 }

@@ -40,58 +40,39 @@ export interface BehaviorTrend {
     id: string;
     title: string;
     description: string;
-    createdAt?: Date | string;
-    updatedAt: Date | string;
+    createdAt: Date;
+    updatedAt: Date;
 
     // Metrics
     mentionCount: number;
     growthRate: number; // percentage change week-over-week
     sentimentScore?: number; // -1 to 1
 
-    // Platform breakdown (flexible format for API compatibility)
-    platformBreakdown?: {
+    // Platform breakdown (percentages)
+    platformBreakdown: {
         sourceId: string;
         percentage: number;
     }[];
 
-    // Platform breakdown (alternative format from API)
-    platforms?: {
-        name: string;
-        percentage: number;
-        count: number;
-    }[];
-
     // Sparkline data (last 30 days)
-    sparklineData?: SparklineDataPoint[];
+    sparklineData: SparklineDataPoint[];
 
     // Associated keywords/phrases
     topPhrases: string[];
 
     // Representative content
-    representativePosts?: {
+    representativePosts: {
         text: string;
         source: string;
         engagement: number;
+        url?: string;
     }[];
 
-    // Representative quotes (alternative key)
-    representativeQuotes?: string[];
-
-    // Linked personas - can be persona IDs with confidence or just names
+    // Linked personas
     linkedPersonas: {
         personaId: string;
         confidence: number; // 0 to 1
-    }[] | string[];
-
-    // Related opportunities
-    relatedOpportunities?: string[];
-
-    // Sentiment breakdown
-    sentiment?: {
-        positive: number;
-        neutral: number;
-        negative: number;
-    };
+    }[];
 
     // Status
     isSaved?: boolean;
@@ -111,7 +92,7 @@ export interface Persona {
     // Visual
     emoji: string;
     color: string;
-    gradient?: string;
+    gradient: string;
 
     // Attributes
     motivations: string[];
@@ -120,18 +101,16 @@ export interface Persona {
 
     // Behavioral patterns
     typicalBehaviors: string[];
-    communicationStyle?: string;
+    communicationStyle: string;
 
     // Pain points
     painPoints: string[];
 
-    // Top behaviors from API
-    topBehaviors?: string[];
-
     // Representative quotes
-    quotes?: {
+    quotes: {
         text: string;
         source: string;
+        url?: string;
     }[];
 
     // Stats
@@ -159,38 +138,36 @@ export interface OpportunityCard {
 
     // Problem definition
     problemStatement: string;
-    signalsSummary?: string;
     whyNow: string;
 
     // Linked entities
     personaIds: string[];
-    linkedTrendIds?: string[];
-    clusterIds?: string[];
+    clusterIds: string[];
 
     // Evidence
-    signals?: {
+    signals: {
         mentionCount: number;
         growthPercentage: number;
         topPhrases: string[];
     };
-    evidenceSnippets?: {
+    evidenceSnippets: {
         text: string;
         source: string;
+        url?: string;
     }[];
 
     // Potential solutions
-    potentialDirections?: string[];
+    potentialDirections: string[];
 
     // Metadata
     severity: OpportunitySeverity;
     confidence: number; // 0 to 1
     status: OpportunityStatus;
-    notes?: string;
+    notes: string;
 
     // Timestamps
-    createdAt: Date | string;
-    createdBy?: string;
-    updatedAt?: Date | string;
+    createdAt: Date;
+    createdBy: string;
     reviewedAt?: Date;
     reviewedBy?: string;
 }
@@ -231,7 +208,7 @@ export interface QuizResult {
 // Filter & Search Types
 // ============================================
 
-export type TimeFilter = '7d' | '30d' | '90d' | 'all';
+export type TimeFilter = '24h' | '7d' | '30d' | '12m' | 'all';
 export type SortOption = 'fastest_rising' | 'most_mentioned' | 'most_polarizing' | 'newest';
 
 export interface DashboardFilters {
@@ -240,4 +217,17 @@ export interface DashboardFilters {
     platforms: string[];
     personas: string[];
     searchQuery: string;
+}
+// ============================================
+// Notification Types
+// ============================================
+
+export interface Notification {
+    id: string;
+    title: string;
+    description: string;
+    type: 'trend' | 'persona' | 'opportunity' | 'system';
+    timestamp: Date;
+    isRead: boolean;
+    link?: string;
 }

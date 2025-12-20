@@ -15,22 +15,18 @@ export function Sparkline({
     height = 40,
     showGradient = true
 }: SparklineProps) {
-    // Handle undefined or empty data
-    const chartData = data && data.length > 0
-        ? data
-        : [{ date: 'now', value: 50 }, { date: 'later', value: 55 }]
-
     // Calculate trend direction
-    const firstValue = chartData[0]?.value || 0
-    const lastValue = chartData[chartData.length - 1]?.value || 0
+    const firstValue = data[0]?.value || 0
+    const lastValue = data[data.length - 1]?.value || 0
     const isPositive = lastValue >= firstValue
 
     const lineColor = isPositive ? '#10b981' : '#ef4444'
-    const gradientId = `sparkline-gradient-${Math.random().toString(36).substr(2, 9)}`
+    // Use a stable ID based on data length or first/last points to prevent flicker during morphing
+    const gradientId = `sparkline-gradient-${color.replace('#', '')}-${data.length}`
 
     return (
         <ResponsiveContainer width="100%" height={height}>
-            <AreaChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+            <AreaChart data={data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                 <defs>
                     <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor={color} stopOpacity={showGradient ? 0.3 : 0} />
@@ -45,7 +41,8 @@ export function Sparkline({
                     fill={`url(#${gradientId})`}
                     dot={false}
                     isAnimationActive={true}
-                    animationDuration={1500}
+                    animationDuration={800}
+                    animationBegin={0}
                 />
             </AreaChart>
         </ResponsiveContainer>

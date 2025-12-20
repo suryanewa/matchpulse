@@ -1,142 +1,72 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { PersonaCard } from '@/components/PersonaCard'
-import { StaggerContainer, StaggerItem } from '@/components/ui/MotionPrimitives'
-import { Loader2 } from 'lucide-react'
-import { Persona } from '@/types'
-
-interface ApiPersona {
-    id: string
-    name: string
-    tagline: string
-    description: string
-    emoji: string
-    color: string
-    linkedClusterCount: number
-    linkedOpportunityCount: number
-    topBehaviors: Array<{
-        id: string
-        title: string
-        growthScore: number
-        confidence: number
-    }>
-    motivations: string[]
-    fears: string[]
-    datingGoals: string[]
-    typicalBehaviors: string[]
-    painPoints: string[]
-}
-
-function transformToPersona(api: ApiPersona): Persona {
-    return {
-        id: api.id,
-        name: api.name,
-        emoji: api.emoji,
-        tagline: api.tagline,
-        description: api.description,
-        color: api.color,
-        linkedTrendCount: api.linkedClusterCount,
-        linkedOpportunityCount: api.linkedOpportunityCount,
-        topBehaviors: api.topBehaviors?.map(b => b.title) || [],
-        motivations: api.motivations || [],
-        fears: api.fears || [],
-        datingGoals: api.datingGoals || [],
-        typicalBehaviors: api.typicalBehaviors || [],
-        painPoints: api.painPoints || []
-    }
-}
+import { personas } from '@/data/mock-data'
+import { motion } from 'framer-motion'
+import { Users, Search } from 'lucide-react'
 
 export default function PersonasPage() {
-    const [personas, setPersonas] = useState<Persona[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    const [searchQuery, setSearchQuery] = useState('')
 
-    useEffect(() => {
-        async function fetchPersonas() {
-            try {
-                const res = await fetch('/api/personas')
-                const data = await res.json()
-
-                if (data.success && data.data) {
-                    const transformed = data.data.map(transformToPersona)
-                    setPersonas(transformed)
-                } else {
-                    setError(data.error || 'Failed to fetch personas')
-                }
-            } catch (err) {
-                setError('Failed to connect to API')
-                console.error(err)
-            } finally {
-                setLoading(false)
-            }
-        }
-        fetchPersonas()
-    }, [])
-
-    const totalLinks = personas.reduce((acc, p) => acc + p.linkedTrendCount, 0)
-    const totalOpps = personas.reduce((acc, p) => acc + p.linkedOpportunityCount, 0)
+    const filteredPersonas = personas.filter(persona =>
+        persona.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        persona.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        persona.description.toLowerCase().includes(searchQuery.toLowerCase())
+    )
 
     return (
         <div className="space-y-6">
             {/* Page Header */}
-            <div className="flex items-end justify-between">
+            <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-white">Personas & Pain Points</h1>
-                    <p className="mt-1 text-surface-400">
-                        Dating archetypes with their common behaviors and challenges
+                    <h1 className="text-2xl font-semibold text-white flex items-center gap-2">
+                        <Users className="h-6 w-6 text-primary-500" />
+                        Dating Personas
+                    </h1>
+                    <p className="mt-1 text-sm text-surface-400">
+                        Explore different dating personality archetypes
                     </p>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-surface-400">
-                    <span className="font-medium text-white">{personas.length}</span> personas defined
-                </div>
+                <span className="text-sm text-surface-400">
+                    {filteredPersonas.length} personas
+                </span>
             </div>
 
-            {/* Overview Stats */}
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="rounded-xl border border-surface-800 bg-surface-900/50 p-4">
-                    <span className="text-sm text-surface-500">Total Personas</span>
-                    <div className="mt-1 text-3xl font-bold text-white">{personas.length}</div>
-                </div>
-                <div className="rounded-xl border border-surface-800 bg-surface-900/50 p-4">
-                    <span className="text-sm text-surface-500">Linked Trends</span>
-                    <div className="mt-1 text-3xl font-bold text-emerald-400">{totalLinks}</div>
-                </div>
-                <div className="rounded-xl border border-surface-800 bg-surface-900/50 p-4">
-                    <span className="text-sm text-surface-500">Active Opportunities</span>
-                    <div className="mt-1 text-3xl font-bold text-amber-400">{totalOpps}</div>
-                </div>
-                <div className="rounded-xl border border-surface-800 bg-surface-900/50 p-4">
-                    <span className="text-sm text-surface-500">Quiz Completions</span>
-                    <div className="mt-1 text-3xl font-bold text-pulse-400">0</div>
-                </div>
+            {/* Search */}
+            <div className="relative max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-500" />
+                <input
+                    type="text"
+                    placeholder="Search personas..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-surface-800 border border-surface-700 rounded-lg text-white placeholder:text-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                />
             </div>
 
-            {/* Loading State */}
-            {loading && (
-                <div className="flex items-center justify-center py-20">
-                    <Loader2 className="h-8 w-8 animate-spin text-pulse-500" />
-                </div>
-            )}
+            {/* Persona Cards Grid */}
+            <motion.div
+                className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+            >
+                {filteredPersonas.map((persona, index) => (
+                    <motion.div
+                        key={persona.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.08 }}
+                    >
+                        <PersonaCard persona={persona} />
+                    </motion.div>
+                ))}
+            </motion.div>
 
-            {/* Error State */}
-            {error && (
-                <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-6 text-center">
-                    <p className="text-red-300">{error}</p>
-                </div>
-            )}
-
-            {/* Persona Grid */}
-            {!loading && !error && (
-                <div>
-                    <h2 className="mb-4 text-lg font-semibold text-white">All Personas</h2>
-                    <StaggerContainer className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        {personas.map(persona => (
-                            <StaggerItem key={persona.id}>
-                                <PersonaCard persona={persona} />
-                            </StaggerItem>
-                        ))}
-                    </StaggerContainer>
+            {filteredPersonas.length === 0 && (
+                <div className="text-center py-12">
+                    <p className="text-surface-400">No personas found matching your search.</p>
                 </div>
             )}
         </div>
