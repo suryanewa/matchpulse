@@ -2,11 +2,9 @@
 
 import { BehaviorTrend } from '@/types'
 import { Sparkline } from '@/components/ui/Sparkline'
-import { Chip } from '@/components/ui/Chip'
 import { formatNumber, formatGrowth, cn } from '@/lib/utils'
-import { TrendingUp, TrendingDown, Bookmark, BookmarkCheck } from 'lucide-react'
+import { TrendingUp, TrendingDown, Bookmark, Heart } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { useState } from 'react'
 import { useDashboard } from '@/context/DashboardContext'
 
 interface BehaviorCardProps {
@@ -27,85 +25,83 @@ export function BehaviorCard({ trend, onClick }: BehaviorCardProps) {
     return (
         <motion.div
             onClick={onClick}
-            whileHover={{ scale: 1.02, y: -2 }}
+            whileHover={{ y: -4 }}
             whileTap={{ scale: 0.98 }}
-            className={cn(
-                'group relative cursor-pointer overflow-hidden rounded-xl border border-surface-800 bg-surface-900/50 p-5 transition-colors',
-                'hover:border-surface-700 hover:bg-surface-900'
-            )}
+            className="group relative h-full cursor-pointer overflow-hidden rounded-3xl bg-[#1a1a1a] p-5 shadow-lg transition-all hover:bg-[#222] hover:shadow-xl hover:shadow-black/50 flex flex-col justify-between"
         >
-            {/* Save Button */}
-            <button
-                onClick={handleSave}
-                className={cn(
-                    'absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg border transition-all',
-                    isSaved
-                        ? 'border-pulse-500/50 bg-pulse-500/10 text-pulse-400'
-                        : 'border-transparent bg-surface-800/50 text-surface-500 opacity-0 group-hover:opacity-100 hover:text-white'
-                )}
-            >
-                {isSaved ? (
-                    <BookmarkCheck className="h-4 w-4" />
-                ) : (
-                    <Bookmark className="h-4 w-4" />
-                )}
-            </button>
+            <div>
+                {/* Header Row */}
+                <div className="mb-4 flex items-start justify-between">
+                    {/* Icon with Gradient Background */}
+                    <div className={cn(
+                        'flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br shadow-inner',
+                        isPositiveGrowth
+                            ? 'from-emerald-500 to-emerald-600'
+                            : 'from-rose-500 to-rose-600'
+                    )}>
+                        {isPositiveGrowth ? (
+                            <TrendingUp className="h-6 w-6 text-white" />
+                        ) : (
+                            <TrendingDown className="h-6 w-6 text-white" />
+                        )}
+                    </div>
 
-            {/* Growth Indicator */}
-            <div className={cn(
-                'mb-4 flex h-10 w-10 items-center justify-center rounded-lg',
-                isPositiveGrowth ? 'bg-emerald-500/20' : 'bg-rose-500/20'
-            )}>
-                {isPositiveGrowth ? (
-                    <TrendingUp className="h-5 w-5 text-emerald-400" />
-                ) : (
-                    <TrendingDown className="h-5 w-5 text-rose-400" />
-                )}
-            </div>
-
-            {/* Title & Description */}
-            <h3 className="mb-2 font-semibold text-white line-clamp-2">
-                {trend.title}
-            </h3>
-            <p className="mb-4 text-sm text-surface-400 line-clamp-2">
-                {trend.description}
-            </p>
-
-            {/* Sparkline */}
-            <div className="mb-4 h-12">
-                <Sparkline
-                    data={trend.sparklineData}
-                    color={isPositiveGrowth ? '#10b981' : '#ef4444'}
-                    height={48}
-                />
-            </div>
-
-            {/* Stats */}
-            <div className="mb-4 flex items-center justify-between text-sm">
-                <div>
-                    <span className="text-surface-500">Mentions: </span>
-                    <span className="font-medium text-white">{formatNumber(trend.mentionCount)}</span>
+                    {/* Save Button */}
+                    <button
+                        onClick={handleSave}
+                        className={cn(
+                            'flex h-10 w-10 items-center justify-center rounded-full transition-all',
+                            isSaved
+                                ? 'bg-emerald-500/20 text-emerald-500'
+                                : 'bg-transparent text-gray-600 hover:bg-[#2a2a2a] hover:text-gray-400'
+                        )}
+                    >
+                        {isSaved ? (
+                            <Heart className="h-5 w-5 fill-current" />
+                        ) : (
+                            <Bookmark className="h-5 w-5" />
+                        )}
+                    </button>
                 </div>
-                <Chip
-                    variant={isPositiveGrowth ? 'success' : 'danger'}
-                    size="sm"
-                >
-                    {formatGrowth(trend.growthRate)}
-                </Chip>
+
+                {/* Title & Description */}
+                <div className="mb-4">
+                    <h3 className="mb-2 text-xl font-bold text-white line-clamp-2 leading-tight">
+                        {trend.title}
+                    </h3>
+                    <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">
+                        {trend.description}
+                    </p>
+                </div>
             </div>
 
-            {/* Top Phrases */}
-            <div className="flex flex-wrap gap-1">
-                {trend.topPhrases.slice(0, 3).map((phrase) => (
-                    <Chip key={phrase} variant="outline" size="sm">
-                        {phrase}
-                    </Chip>
-                ))}
-                {trend.topPhrases.length > 3 && (
-                    <Chip variant="outline" size="sm">
-                        +{trend.topPhrases.length - 3}
-                    </Chip>
-                )}
+            {/* Metrics & Graph Row */}
+            <div className="mt-auto">
+                <div className="mb-4 h-24 w-full -mx-2">
+                    <Sparkline
+                        data={trend.sparklineData}
+                        color={isPositiveGrowth ? '#10b981' : '#f43f5e'} // emerald-500 : rose-500
+                        height={96}
+                        strokeWidth={3}
+                        showGradient={true}
+                    />
+                </div>
+
+                <div className="flex items-end justify-between border-t border-[#2a2a2a] pt-4">
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <span className={cn(
+                                'text-2xl font-bold tracking-tight',
+                                isPositiveGrowth ? 'text-emerald-500' : 'text-rose-500'
+                            )}>
+                                {formatGrowth(trend.growthRate)}
+                            </span>
+                        </div>
+                        <span className="text-xs font-medium uppercase tracking-wider text-gray-600">
+                            {formatNumber(trend.mentionCount)} Mentions
+                        </span>
+                    </div>
+                </div>
             </div>
         </motion.div>
     )

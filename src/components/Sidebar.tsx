@@ -11,7 +11,9 @@ import {
     Sparkles,
     Settings,
     HelpCircle,
-    Info
+    Info,
+    Heart,
+    Gift
 } from 'lucide-react'
 
 const navItems = [
@@ -32,6 +34,21 @@ const navItems = [
         href: '/opportunities',
         icon: Lightbulb,
         description: 'Product ideas',
+    },
+]
+
+const publicNavItems = [
+    {
+        label: 'Cupid',
+        href: '/cupid',
+        icon: Heart,
+        description: 'Date planner',
+    },
+    {
+        label: 'Wrapped',
+        href: '/wrapped',
+        icon: Gift,
+        description: 'Relationship recap',
     },
 ]
 
@@ -75,8 +92,8 @@ export function Sidebar() {
 
                 {/* Main Navigation */}
                 <nav className="flex-1 space-y-1 px-3 py-4">
-                    <div className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-surface-500">
-                        Dashboard
+                    <div className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                        Insights
                     </div>
                     {navItems.map((item) => {
                         const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
@@ -85,54 +102,70 @@ export function Sidebar() {
                                 key={item.href}
                                 href={item.href}
                                 className={cn(
-                                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all',
+                                    'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all',
                                     isActive
-                                        ? 'bg-gradient-to-r from-pulse-500/20 to-accent-500/10 text-white'
-                                        : 'text-surface-400 hover:bg-surface-800/50 hover:text-white'
+                                        ? 'bg-gradient-to-r from-[#FE3C72]/20 to-[#FF6B6B]/10 text-white'
+                                        : 'text-gray-400 hover:bg-[#1a1a1a] hover:text-white'
                                 )}
                             >
                                 <item.icon className={cn(
                                     'h-5 w-5 transition-colors',
-                                    isActive ? 'text-pulse-400' : 'text-surface-500'
+                                    isActive ? 'text-[#FE3C72]' : 'text-gray-500'
                                 )} />
-                                <div className="flex flex-col">
-                                    <span>{item.label}</span>
-                                    {isActive && (
-                                        <span className="text-xs text-surface-500">{item.description}</span>
-                                    )}
-                                </div>
+                                <span>{item.label}</span>
                             </Link>
                         )
                     })}
 
-                    {/* Quiz Link */}
-                    <div className="mt-6 mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-surface-500">
+                    {/* Public Links */}
+                    <div className="mt-6 mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
                         Public
                     </div>
+                    {publicNavItems.map((item) => {
+                        const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                        return (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className={cn(
+                                    'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all',
+                                    isActive
+                                        ? 'bg-gradient-to-r from-[#FE3C72]/20 to-[#FF6B6B]/10 text-white'
+                                        : 'text-gray-400 hover:bg-[#1a1a1a] hover:text-white'
+                                )}
+                            >
+                                <item.icon className={cn(
+                                    'h-5 w-5 transition-colors',
+                                    isActive ? 'text-[#FE3C72]' : 'text-gray-500'
+                                )} />
+                                <span>{item.label}</span>
+                            </Link>
+                        )
+                    })}
                     <Link
                         href="/quiz"
                         className={cn(
-                            'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all',
+                            'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all',
                             pathname.startsWith('/quiz')
-                                ? 'bg-gradient-to-r from-pulse-500/20 to-accent-500/10 text-white'
-                                : 'text-surface-400 hover:bg-surface-800/50 hover:text-white'
+                                ? 'bg-gradient-to-r from-[#FE3C72]/20 to-[#FF6B6B]/10 text-white'
+                                : 'text-gray-400 hover:bg-[#1a1a1a] hover:text-white'
                         )}
                     >
                         <Sparkles className={cn(
                             'h-5 w-5 transition-colors',
-                            pathname.startsWith('/quiz') ? 'text-pulse-400' : 'text-surface-500'
+                            pathname.startsWith('/quiz') ? 'text-[#FE3C72]' : 'text-gray-500'
                         )} />
-                        <span>Persona Quiz</span>
+                        <span>Quiz</span>
                     </Link>
                 </nav>
 
                 {/* Bottom Navigation */}
-                <div className="border-t border-surface-800 px-3 py-4">
+                <div className="border-t border-[#1a1a1a] px-3 py-4">
                     {bottomNavItems.map((item) => (
                         <Link
                             key={item.href}
                             href={item.href}
-                            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-surface-400 transition-colors hover:bg-surface-800/50 hover:text-white"
+                            className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-gray-500 transition-colors hover:bg-[#1a1a1a] hover:text-gray-300"
                         >
                             <item.icon className="h-4 w-4" />
                             <span>{item.label}</span>

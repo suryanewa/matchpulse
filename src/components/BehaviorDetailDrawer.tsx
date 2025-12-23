@@ -3,10 +3,9 @@
 import { BehaviorTrend } from '@/types'
 import { getPersonaById, contentSources } from '@/data/mock-data'
 import { Sparkline } from '@/components/ui/Sparkline'
-import { Chip } from '@/components/ui/Chip'
 import { formatNumber, formatGrowth, cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
-import { X, ArrowRight, Share2, MessageSquare, Bookmark, BookmarkCheck, ExternalLink, TrendingUp, TrendingDown } from 'lucide-react'
+import { X, ArrowRight, Bookmark, Heart, ExternalLink, TrendingUp, TrendingDown } from 'lucide-react'
 import { useDashboard } from '@/context/DashboardContext'
 import { createPortal } from 'react-dom'
 import { useEffect, useState } from 'react'
@@ -43,41 +42,43 @@ export function BehaviorDetailDrawer({ trend, onClose }: BehaviorDetailDrawerPro
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+                className="fixed inset-0 bg-black/70 backdrop-blur-sm"
                 onClick={onClose}
             />
 
-            {/* Drawer */}
+            {/* Drawer - Tinder style */}
             <motion.aside
                 initial={{ x: '100%' }}
                 animate={{ x: 0 }}
                 exit={{ x: '100%' }}
                 transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className="relative flex h-full w-full max-w-xl flex-col border-l border-surface-800 bg-surface-950 shadow-2xl"
+                className="relative flex h-full w-full max-w-xl flex-col bg-[#111] shadow-2xl"
             >
-                {/* Header */}
-                <div className="flex-shrink-0 flex items-center justify-between border-b border-surface-800 bg-surface-950/95 p-6 backdrop-blur-sm">
+                {/* Header - Tinder style */}
+                <div className="flex-shrink-0 flex items-center justify-between bg-[#1a1a1a] p-5">
                     <div className="flex items-center gap-3">
                         <div className={cn(
-                            'flex h-10 w-10 items-center justify-center rounded-lg',
-                            isPositiveGrowth ? 'bg-emerald-500/20' : 'bg-rose-500/20'
+                            'flex h-12 w-12 items-center justify-center rounded-xl',
+                            isPositiveGrowth
+                                ? 'bg-gradient-to-br from-emerald-500 to-teal-500'
+                                : 'bg-gradient-to-br from-rose-500 to-red-500'
                         )}>
                             {isPositiveGrowth ? (
-                                <TrendingUp className="h-5 w-5 text-emerald-400" />
+                                <TrendingUp className="h-6 w-6 text-white" />
                             ) : (
-                                <TrendingDown className="h-5 w-5 text-rose-400" />
+                                <TrendingDown className="h-6 w-6 text-white" />
                             )}
                         </div>
                         <div>
-                            <span className="text-xs text-surface-500">Behavior Trend</span>
+                            <span className="text-xs text-gray-500">Behavior Trend</span>
                             <div className="flex items-center gap-2">
                                 <span className={cn(
-                                    'text-sm font-semibold',
+                                    'text-lg font-bold',
                                     isPositiveGrowth ? 'text-emerald-400' : 'text-rose-400'
                                 )}>
                                     {formatGrowth(trend.growthRate)}
                                 </span>
-                                <span className="text-xs text-surface-500">vs last period</span>
+                                <span className="text-xs text-gray-500">vs last period</span>
                             </div>
                         </div>
                     </div>
@@ -85,49 +86,49 @@ export function BehaviorDetailDrawer({ trend, onClose }: BehaviorDetailDrawerPro
                         <button
                             onClick={() => toggleSaveTrend(trend.id)}
                             className={cn(
-                                'flex h-9 w-9 items-center justify-center rounded-lg border transition-colors',
+                                'flex h-10 w-10 items-center justify-center rounded-full transition-all',
                                 isSaved
-                                    ? 'border-pulse-500/50 bg-pulse-500/10 text-pulse-400'
-                                    : 'border-surface-700 text-surface-400 hover:bg-surface-800 hover:text-white'
+                                    ? 'bg-[#FE3C72] text-white'
+                                    : 'bg-[#2a2a2a] text-gray-400 hover:bg-[#333] hover:text-white'
                             )}
                         >
                             {isSaved ? (
-                                <BookmarkCheck className="h-4 w-4" />
+                                <Heart className="h-5 w-5 fill-current" />
                             ) : (
-                                <Bookmark className="h-4 w-4" />
+                                <Bookmark className="h-5 w-5" />
                             )}
                         </button>
                         <button
                             onClick={onClose}
-                            className="flex h-9 w-9 items-center justify-center rounded-lg border border-surface-700 text-surface-400 transition-colors hover:bg-surface-800 hover:text-white"
+                            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#2a2a2a] text-gray-400 transition-all hover:bg-[#333] hover:text-white"
                         >
-                            <X className="h-4 w-4" />
+                            <X className="h-5 w-5" />
                         </button>
                     </div>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-6">
+                <div className="flex-1 overflow-y-auto p-5 space-y-6">
                     {/* Title & Description */}
-                    <div className="mb-6">
-                        <h2 className="mb-2 text-2xl font-bold text-white">
+                    <div>
+                        <h2 className="mb-3 text-2xl font-bold text-white">
                             {trend.title}
                         </h2>
-                        <p className="text-surface-400">
+                        <p className="text-gray-400 leading-relaxed">
                             {trend.description}
                         </p>
                     </div>
 
-                    {/* Stats Grid */}
-                    <div className="mb-6 grid grid-cols-3 gap-4">
-                        <div className="rounded-lg border border-surface-800 bg-surface-900/50 p-4">
-                            <span className="text-xs text-surface-500">Total Mentions</span>
+                    {/* Stats Grid - Tinder style cards */}
+                    <div className="grid grid-cols-3 gap-3">
+                        <div className="rounded-2xl bg-[#1a1a1a] p-4">
+                            <span className="text-xs text-gray-500">Total Mentions</span>
                             <div className="mt-1 text-2xl font-bold text-white">
                                 {formatNumber(trend.mentionCount)}
                             </div>
                         </div>
-                        <div className="rounded-lg border border-surface-800 bg-surface-900/50 p-4">
-                            <span className="text-xs text-surface-500">Growth Rate</span>
+                        <div className="rounded-2xl bg-[#1a1a1a] p-4">
+                            <span className="text-xs text-gray-500">Growth Rate</span>
                             <div className={cn(
                                 'mt-1 text-2xl font-bold',
                                 isPositiveGrowth ? 'text-emerald-400' : 'text-rose-400'
@@ -135,8 +136,8 @@ export function BehaviorDetailDrawer({ trend, onClose }: BehaviorDetailDrawerPro
                                 {formatGrowth(trend.growthRate)}
                             </div>
                         </div>
-                        <div className="rounded-lg border border-surface-800 bg-surface-900/50 p-4">
-                            <span className="text-xs text-surface-500">Sentiment</span>
+                        <div className="rounded-2xl bg-[#1a1a1a] p-4">
+                            <span className="text-xs text-gray-500">Sentiment</span>
                             <div className={cn(
                                 'mt-1 text-2xl font-bold',
                                 (trend.sentimentScore || 0) > 0 ? 'text-emerald-400' :
@@ -148,43 +149,45 @@ export function BehaviorDetailDrawer({ trend, onClose }: BehaviorDetailDrawerPro
                         </div>
                     </div>
 
-                    {/* Sparkline */}
-                    <div className="mb-6">
-                        <h3 className="mb-3 text-sm font-semibold text-surface-300">
+                    {/* Sparkline - Tinder style */}
+                    <div>
+                        <h3 className="mb-3 text-sm font-semibold text-gray-400">
                             Trend Over Time ({timeFilter === '24h' ? '24 hours' : timeFilter === '7d' ? '7 days' : '30 days'})
                         </h3>
-                        <div className="h-32 rounded-lg border border-surface-800 bg-surface-900/50 p-4">
+                        <div className="h-36 rounded-2xl bg-[#1a1a1a] p-4">
                             <Sparkline
                                 data={trend.sparklineData}
-                                color={isPositiveGrowth ? '#10b981' : '#ef4444'}
-                                height={80}
+                                color={isPositiveGrowth ? '#10b981' : '#f43f5e'}
+                                height={100}
+                                strokeWidth={3}
+                                showGradient={true}
                             />
                         </div>
                     </div>
 
-                    {/* Platform Breakdown */}
-                    <div className="mb-6">
-                        <h3 className="mb-3 text-sm font-semibold text-surface-300">
+                    {/* Platform Breakdown - Tinder style bars */}
+                    <div>
+                        <h3 className="mb-3 text-sm font-semibold text-gray-400">
                             Platform Distribution
                         </h3>
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                             {trend.platformBreakdown.map((platform) => {
                                 const source = contentSources.find(s => s.id === platform.sourceId)
                                 return (
                                     <div key={platform.sourceId} className="flex items-center gap-3">
-                                        <span className="text-lg">{source?.icon}</span>
-                                        <span className="w-20 text-sm text-surface-300">{source?.name}</span>
+                                        <span className="text-xl">{source?.icon}</span>
+                                        <span className="w-20 text-sm text-gray-300">{source?.name}</span>
                                         <div className="flex-1">
-                                            <div className="h-2 overflow-hidden rounded-full bg-surface-800">
+                                            <div className="h-2.5 overflow-hidden rounded-full bg-[#2a2a2a]">
                                                 <motion.div
                                                     initial={{ width: 0 }}
                                                     animate={{ width: `${platform.percentage}%` }}
                                                     transition={{ duration: 1, delay: 0.2 }}
-                                                    className="h-full rounded-full bg-gradient-to-r from-pulse-500 to-accent-500"
+                                                    className="h-full rounded-full bg-gradient-to-r from-[#FE3C72] to-[#FF6B6B]"
                                                 />
                                             </div>
                                         </div>
-                                        <span className="w-12 text-right text-sm font-medium text-white">
+                                        <span className="w-12 text-right text-sm font-bold text-white">
                                             {platform.percentage}%
                                         </span>
                                     </div>
@@ -193,23 +196,26 @@ export function BehaviorDetailDrawer({ trend, onClose }: BehaviorDetailDrawerPro
                         </div>
                     </div>
 
-                    {/* Top Phrases */}
-                    <div className="mb-6">
-                        <h3 className="mb-3 text-sm font-semibold text-surface-300">
+                    {/* Top Phrases - Tinder style chips */}
+                    <div>
+                        <h3 className="mb-3 text-sm font-semibold text-gray-400">
                             Related Phrases
                         </h3>
                         <div className="flex flex-wrap gap-2">
                             {trend.topPhrases.map((phrase) => (
-                                <Chip key={phrase} variant="primary" size="md">
+                                <span
+                                    key={phrase}
+                                    className="rounded-full bg-gradient-to-r from-[#FE3C72] to-[#FF6B6B] px-4 py-2 text-sm font-semibold text-white"
+                                >
                                     {phrase}
-                                </Chip>
+                                </span>
                             ))}
                         </div>
                     </div>
 
-                    {/* Linked Personas */}
-                    <div className="mb-6">
-                        <h3 className="mb-3 text-sm font-semibold text-surface-300">
+                    {/* Linked Personas - Tinder style cards */}
+                    <div>
+                        <h3 className="mb-3 text-sm font-semibold text-gray-400">
                             Associated Personas
                         </h3>
                         <div className="space-y-2">
@@ -219,23 +225,23 @@ export function BehaviorDetailDrawer({ trend, onClose }: BehaviorDetailDrawerPro
                                 return (
                                     <div
                                         key={link.personaId}
-                                        className="flex items-center justify-between rounded-lg border border-surface-800 bg-surface-900/50 p-3 transition-colors hover:border-surface-700"
+                                        className="flex items-center justify-between rounded-2xl bg-[#1a1a1a] p-4 transition-colors hover:bg-[#222]"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <span className="text-2xl">{persona.emoji}</span>
+                                            <span className="text-3xl">{persona.emoji}</span>
                                             <div>
-                                                <div className="font-medium text-white">{persona.name}</div>
-                                                <div className="text-xs text-surface-500">{persona.tagline}</div>
+                                                <div className="font-semibold text-white">{persona.name}</div>
+                                                <div className="text-xs text-gray-500">{persona.tagline}</div>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-3">
                                             <div className="text-right">
-                                                <div className="text-sm font-semibold text-white">
+                                                <div className="text-lg font-bold text-[#FE3C72]">
                                                     {(link.confidence * 100).toFixed(0)}%
                                                 </div>
-                                                <div className="text-xs text-surface-500">confidence</div>
+                                                <div className="text-xs text-gray-500">match</div>
                                             </div>
-                                            <ArrowRight className="h-4 w-4 text-surface-500" />
+                                            <ArrowRight className="h-5 w-5 text-gray-600" />
                                         </div>
                                     </div>
                                 )
@@ -243,9 +249,9 @@ export function BehaviorDetailDrawer({ trend, onClose }: BehaviorDetailDrawerPro
                         </div>
                     </div>
 
-                    {/* Representative Posts */}
-                    <div className="mb-6">
-                        <h3 className="mb-3 text-sm font-semibold text-surface-300">
+                    {/* Representative Posts - Tinder style quote cards */}
+                    <div>
+                        <h3 className="mb-3 text-sm font-semibold text-gray-400">
                             Representative Posts
                         </h3>
                         <div className="space-y-3">
@@ -255,31 +261,30 @@ export function BehaviorDetailDrawer({ trend, onClose }: BehaviorDetailDrawerPro
                                     href: post.url,
                                     target: '_blank',
                                     rel: 'noopener noreferrer',
-                                    className: "block rounded-lg border border-surface-800 bg-surface-900/50 p-4 transition-all hover:border-surface-600 hover:bg-surface-800/80 group"
+                                    className: "block rounded-2xl bg-[#1a1a1a] p-4 transition-all hover:bg-[#222] group"
                                 } : {
-                                    className: "rounded-lg border border-surface-800 bg-surface-900/50 p-4"
+                                    className: "rounded-2xl bg-[#1a1a1a] p-4"
                                 }
 
                                 return (
                                     <CardWrapper key={index} {...(wrapperProps as any)}>
                                         <div className="flex justify-between gap-2">
-                                            <p className="mb-3 text-sm text-surface-200 italic flex-1">
+                                            <p className="mb-3 text-sm text-gray-300 italic flex-1">
                                                 &ldquo;{post.text}&rdquo;
                                             </p>
                                             {post.url && (
-                                                <ExternalLink className="h-3.5 w-3.5 shrink-0 text-surface-500 transition-colors group-hover:text-pulse-400" />
+                                                <ExternalLink className="h-4 w-4 shrink-0 text-gray-600 transition-colors group-hover:text-[#FE3C72]" />
                                             )}
                                         </div>
-                                        <div className="flex items-center justify-between text-xs text-surface-500">
+                                        <div className="flex items-center justify-between text-xs text-gray-500">
                                             <span>via {post.source}</span>
-                                            <span>{formatNumber(post.engagement)} engagements</span>
+                                            <span className="font-medium text-gray-400">{formatNumber(post.engagement)} engagements</span>
                                         </div>
                                     </CardWrapper>
                                 )
                             })}
                         </div>
                     </div>
-
                 </div>
             </motion.aside>
         </div>,

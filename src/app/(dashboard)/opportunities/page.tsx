@@ -39,37 +39,36 @@ export default function OpportunitiesPage() {
             {/* Page Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-semibold text-white flex items-center gap-2">
-                        <Lightbulb className="h-6 w-6 text-amber-500" />
+                    <h1 className="text-2xl font-bold text-white">
                         Product Opportunities
                     </h1>
-                    <p className="mt-1 text-sm text-surface-400">
+                    <p className="mt-1 text-sm text-gray-500">
                         Data-driven feature ideas from behavioral signals
                     </p>
                 </div>
-                <span className="text-sm text-surface-400">
+                <span className="rounded-full bg-[#1a1a1a] px-3 py-1.5 text-xs font-medium text-gray-400">
                     {filteredOpportunities.length} opportunities
                 </span>
             </div>
 
             {/* Filters */}
-            <div className="flex flex-col md:flex-row md:items-center gap-4">
+            <div className="flex flex-col md:flex-row md:items-center gap-3">
                 <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-500" />
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                     <input
                         type="text"
                         placeholder="Search opportunities..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 bg-surface-900 border border-surface-700 rounded-xl text-sm text-white placeholder:text-surface-500 transition-all focus:outline-none focus:border-primary-500/50 focus:ring-4 focus:ring-primary-500/5"
+                        className="w-full pl-10 pr-4 py-2.5 bg-[#1a1a1a] border-0 rounded-xl text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FE3C72]/50"
                     />
                 </div>
-                <div className="flex items-center gap-3">
-                    <div className="relative group/select">
+                <div className="flex items-center gap-2">
+                    <div className="relative">
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="appearance-none bg-surface-900 border border-surface-700 rounded-xl pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-primary-500/50 focus:ring-4 focus:ring-primary-500/5 transition-all cursor-pointer min-w-[140px]"
+                            className="appearance-none bg-[#1a1a1a] border-0 rounded-xl pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#FE3C72]/50 cursor-pointer min-w-[140px]"
                         >
                             <option value="all">All Status</option>
                             <option value="new">New</option>
@@ -77,14 +76,14 @@ export default function OpportunitiesPage() {
                             <option value="in_discovery">In Discovery</option>
                             <option value="discarded">Discarded</option>
                         </select>
-                        <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-500 pointer-events-none group-hover/select:text-surface-300 transition-colors" />
+                        <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
                     </div>
 
-                    <div className="relative group/select">
+                    <div className="relative">
                         <select
                             value={severityFilter}
                             onChange={(e) => setSeverityFilter(e.target.value)}
-                            className="appearance-none bg-surface-900 border border-surface-700 rounded-xl pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-primary-500/50 focus:ring-4 focus:ring-primary-500/5 transition-all cursor-pointer min-w-[140px]"
+                            className="appearance-none bg-[#1a1a1a] border-0 rounded-xl pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#FE3C72]/50 cursor-pointer min-w-[140px]"
                         >
                             <option value="all">All Severity</option>
                             <option value="critical">Critical</option>
@@ -92,7 +91,7 @@ export default function OpportunitiesPage() {
                             <option value="medium">Medium</option>
                             <option value="low">Low</option>
                         </select>
-                        <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-500 pointer-events-none group-hover/select:text-surface-300 transition-colors" />
+                        <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
                     </div>
                 </div>
             </div>

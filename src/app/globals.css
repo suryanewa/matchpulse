@@ -113,12 +113,10 @@ body {
   }
 
   .shimmer {
-    background: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0) 0%,
-      rgba(255, 255, 255, 0.1) 50%,
-      rgba(255, 255, 255, 0) 100%
-    );
+    background: linear-gradient(90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0) 100%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
   }
@@ -127,6 +125,7 @@ body {
     0% {
       background-position: 200% 0;
     }
+
     100% {
       background-position: -200% 0;
     }
@@ -140,7 +139,9 @@ body {
 }
 
 /* Smooth transitions for theme changes */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   transition-property: background-color, border-color;
   transition-duration: 150ms;
   transition-timing-function: ease;

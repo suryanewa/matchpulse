@@ -67,7 +67,7 @@ export function OpportunityCard({ opportunity, onStatusChange, timeFilter = '30d
     return (
         <motion.article
             layout
-            className="group overflow-hidden rounded-2xl border border-surface-800 bg-surface-900/40 transition-all hover:border-surface-700 hover:bg-surface-900/60 shadow-sm hover:shadow-xl hover:shadow-primary-500/5"
+            className="group overflow-hidden rounded-3xl bg-[#1a1a1a] transition-all hover:bg-[#222] shadow-lg hover:shadow-xl hover:shadow-black/50"
         >
             {/* Main Content */}
             <div className="p-5">
@@ -77,50 +77,40 @@ export function OpportunityCard({ opportunity, onStatusChange, timeFilter = '30d
                         <div className="space-y-3">
                             {/* Status/Severity/Confidence Row */}
                             <div className="flex flex-wrap items-center gap-2">
-                                {(() => {
-                                    const severityColors = getSeverityColor(opportunity.severity)
-                                    return (
-                                        <Chip
-                                            className={cn("gap-1.5", severityColors.className)}
-                                            style={severityColors.style}
-                                            size="sm"
-                                            variant="custom"
-                                        >
-                                            {getSeverityIcon(opportunity.severity)}
-                                            {opportunity.severity}
-                                        </Chip>
-                                    )
-                                })()}
-                                {(() => {
-                                    const statusColors = getStatusColor(opportunity.status)
-                                    return (
-                                        <Chip
-                                            className={cn("gap-1.5", statusColors.className)}
-                                            style={statusColors.style}
-                                            size="sm"
-                                            variant="custom"
-                                        >
-                                            {getStatusIcon(opportunity.status)}
-                                            {opportunity.status.replace('_', ' ')}
-                                        </Chip>
-                                    )
-                                })()}
-                                <div className="flex items-center gap-1.5 ml-1 px-2 py-0.5 rounded-full bg-surface-800/50 border border-surface-700/50">
-                                    <Target className="h-3 w-3 text-surface-500" />
-                                    <span className="text-[10px] font-bold text-surface-400 uppercase tracking-widest leading-none pt-0.5">
-                                        {(opportunity.confidence * 100).toFixed(0)}% Confidence
-                                    </span>
-                                </div>
+                                {/* Severity Badge - Tinder style */}
+                                <span className={cn(
+                                    'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase',
+                                    opportunity.severity === 'critical' && 'bg-gradient-to-r from-rose-500 to-red-500 text-white',
+                                    opportunity.severity === 'high' && 'bg-gradient-to-r from-orange-500 to-amber-500 text-white',
+                                    opportunity.severity === 'medium' && 'bg-gradient-to-r from-yellow-500 to-amber-400 text-black',
+                                    opportunity.severity === 'low' && 'bg-[#2a2a2a] text-gray-400'
+                                )}>
+                                    {opportunity.severity}
+                                </span>
+                                {/* Status Badge */}
+                                <span className={cn(
+                                    'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase',
+                                    opportunity.status === 'new' && 'bg-[#FE3C72] text-white',
+                                    opportunity.status === 'reviewed' && 'bg-emerald-500 text-white',
+                                    opportunity.status === 'in_discovery' && 'bg-purple-500 text-white',
+                                    opportunity.status === 'not_relevant' && 'bg-gray-600 text-gray-300'
+                                )}>
+                                    {opportunity.status.replace('_', ' ')}
+                                </span>
+                                {/* Confidence */}
+                                <span className="text-xs font-medium text-gray-500">
+                                    {(opportunity.confidence * 100).toFixed(0)}% confidence
+                                </span>
                             </div>
 
-                            <motion.h3 layout="position" className="text-xl font-bold text-white tracking-tight group-hover:text-primary-400 transition-colors">
+                            <h3 className="text-xl font-bold text-white">
                                 {opportunity.title}
-                            </motion.h3>
+                            </h3>
                         </div>
 
-                        <motion.p layout="position" className="text-surface-300 leading-relaxed text-[15px]">
+                        <p className="text-gray-400 leading-relaxed text-sm">
                             {opportunity.problemStatement}
-                        </motion.p>
+                        </p>
 
                         <div className="flex flex-wrap items-center gap-3 pt-1">
                             <div className="flex items-center gap-2 pr-3 border-r border-surface-800">
@@ -157,48 +147,48 @@ export function OpportunityCard({ opportunity, onStatusChange, timeFilter = '30d
                         </div>
                     </div>
 
-                    {/* Right: Key Stats */}
+                    {/* Right: Key Stats - Tinder style cards */}
                     <div className="lg:col-span-4 flex flex-col gap-3">
-                        <div className="flex items-center justify-between rounded-xl bg-pulse-500/10 border border-pulse-500/20 p-3.5 transition-all hover:bg-pulse-500/15 group/stat">
+                        <div className="rounded-2xl bg-gradient-to-r from-[#FE3C72]/10 to-[#FF6B6B]/10 p-4">
                             <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-pulse-500/20 text-pulse-400">
-                                    <MessageSquare className="h-5 w-5" />
+                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#FE3C72] to-[#FF6B6B]">
+                                    <MessageSquare className="h-6 w-6 text-white" />
                                 </div>
-                                <div className="flex flex-col">
-                                    <span className="text-xl font-bold text-white leading-none">
+                                <div>
+                                    <span className="text-2xl font-bold text-white">
                                         {formatNumber(timeStats.mentions)}
                                     </span>
-                                    <span className="text-xs text-pulse-400/80 font-medium">Mentions</span>
+                                    <p className="text-xs text-[#FE3C72] font-medium">Mentions</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-between rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-3.5 transition-all hover:bg-emerald-500/15 group/stat">
+                        <div className="rounded-2xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 p-4">
                             <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400">
-                                    <TrendingUp className="h-5 w-5" />
+                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500">
+                                    <TrendingUp className="h-6 w-6 text-white" />
                                 </div>
-                                <div className="flex flex-col">
-                                    <span className="text-xl font-bold text-white leading-none">
+                                <div>
+                                    <span className="text-2xl font-bold text-white">
                                         {formatGrowth(timeStats.growth)}
                                     </span>
-                                    <span className="text-xs text-emerald-400/80 font-medium">Growth</span>
+                                    <p className="text-xs text-emerald-400 font-medium">Growth</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Expand Button */}
-                <div className="mt-5 flex items-center gap-4">
+                {/* Expand Button - Tinder style */}
+                <div className="mt-5">
                     <button
                         onClick={() => setIsExpanded(!isExpanded)}
-                        className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-surface-800/50 py-3 text-sm font-semibold text-surface-300 transition-all hover:bg-surface-700/70 hover:text-white border border-surface-700/50 active:scale-[0.98]"
+                        className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#2a2a2a] py-3.5 text-sm font-semibold text-gray-300 transition-all hover:bg-[#333] hover:text-white"
                     >
-                        {isExpanded ? 'Hide detailed insights' : 'View detailed evidence & roadmap'}
+                        {isExpanded ? 'Hide details' : 'View detailed evidence & roadmap'}
                         <ChevronDown className={cn(
-                            'h-4 w-4 transition-all duration-500 ease-out',
-                            isExpanded ? 'rotate-180 text-primary-400' : 'text-surface-500'
+                            'h-4 w-4 transition-transform duration-300',
+                            isExpanded && 'rotate-180'
                         )} />
                     </button>
                 </div>
@@ -212,7 +202,7 @@ export function OpportunityCard({ opportunity, onStatusChange, timeFilter = '30d
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                        className="overflow-hidden bg-surface-950/40 border-t border-surface-800/50"
+                        className="overflow-hidden bg-[#111] border-t border-[#2a2a2a]"
                     >
                         <div className="p-8 space-y-8">
                             {/* Grid Highlights */}

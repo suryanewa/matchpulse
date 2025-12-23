@@ -131,58 +131,56 @@ function BehaviorsContent() {
             {/* Page Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-semibold text-white flex items-center gap-2">
-                        <TrendingUp className="h-6 w-6 text-primary-500" />
+                    <h1 className="text-2xl font-bold text-white flex items-center gap-2">
                         Behavior Trends
                     </h1>
-                    <p className="mt-1 text-sm text-surface-400">
+                    <p className="mt-1 text-sm text-gray-500">
                         Discover emerging dating behaviors and patterns
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <span className="text-sm text-surface-400">
+                    <span className="rounded-full bg-[#1a1a1a] px-3 py-1.5 text-xs font-medium text-gray-400">
                         {filteredTrends.length} trends
                     </span>
                 </div>
             </div>
 
             {/* Filters */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
                 <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-500" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                     <input
                         type="text"
                         placeholder="Search trends..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 bg-surface-800 border border-surface-700 rounded-lg text-white placeholder:text-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                        className="w-full pl-10 pr-4 py-2.5 bg-[#1a1a1a] border-0 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FE3C72]/50"
                     />
                 </div>
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => setShowSavedOnly(!showSavedOnly)}
                         className={cn(
-                            'flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors',
+                            'flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all',
                             showSavedOnly
-                                ? 'border-primary-500/50 bg-primary-500/10 text-primary-400'
-                                : 'border-surface-700 bg-surface-800 text-surface-400 hover:text-white'
+                                ? 'bg-[#FE3C72] text-white'
+                                : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#2a2a2a] hover:text-white'
                         )}
                     >
                         <Bookmark className={cn('h-4 w-4', showSavedOnly && 'fill-current')} />
-                        Saved
+                        Saved Only
                     </button>
-                    <Filter className="h-4 w-4 text-surface-500 ml-2" />
                     <div className="relative">
                         <select
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value as 'growth' | 'mentions' | 'recent')}
-                            className="appearance-none bg-surface-800 border border-surface-700 rounded-lg pl-3 pr-10 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 cursor-pointer"
+                            className="appearance-none bg-[#1a1a1a] border-0 rounded-xl pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#FE3C72]/50 cursor-pointer"
                         >
                             <option value="growth">Fastest Rising</option>
                             <option value="mentions">Most Mentioned</option>
                             <option value="recent">Recently Updated</option>
                         </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-500 pointer-events-none" />
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
                     </div>
                 </div>
             </div>

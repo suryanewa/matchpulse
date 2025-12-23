@@ -6,6 +6,7 @@ interface SparklineProps {
     data: { date: string; value: number }[]
     color?: string
     height?: number
+    strokeWidth?: number
     showGradient?: boolean
 }
 
@@ -13,6 +14,7 @@ export function Sparkline({
     data,
     color = '#ec4899',
     height = 40,
+    strokeWidth = 2,
     showGradient = true
 }: SparklineProps) {
     // Calculate trend direction
@@ -20,16 +22,15 @@ export function Sparkline({
     const lastValue = data[data.length - 1]?.value || 0
     const isPositive = lastValue >= firstValue
 
-    const lineColor = isPositive ? '#10b981' : '#ef4444'
     // Use a stable ID based on data length or first/last points to prevent flicker during morphing
     const gradientId = `sparkline-gradient-${color.replace('#', '')}-${data.length}`
 
     return (
         <ResponsiveContainer width="100%" height={height}>
-            <AreaChart data={data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+            <AreaChart data={data} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
                 <defs>
                     <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={color} stopOpacity={showGradient ? 0.3 : 0} />
+                        <stop offset="0%" stopColor={color} stopOpacity={showGradient ? 0.2 : 0} />
                         <stop offset="100%" stopColor={color} stopOpacity={0} />
                     </linearGradient>
                 </defs>
@@ -37,7 +38,7 @@ export function Sparkline({
                     type="monotone"
                     dataKey="value"
                     stroke={color}
-                    strokeWidth={2}
+                    strokeWidth={strokeWidth}
                     fill={`url(#${gradientId})`}
                     dot={false}
                     isAnimationActive={true}
