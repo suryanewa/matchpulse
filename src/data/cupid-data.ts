@@ -31,9 +31,13 @@ export const VIBE_DEFINITIONS: Record<VibeTag, { label: string; emoji: string; c
 };
 
 export const BUDGET_DEFINITIONS: Record<BudgetTier, { label: string; emoji: string; range: string }> = {
-    'low-key': { label: 'Low-Key', emoji: '💚', range: '$0-30' },
+    'free': { label: 'Free', emoji: '🆓', range: '$0' },
+    'budget': { label: 'Budget', emoji: '💵', range: '$1-15' },
+    'low-key': { label: 'Low-Key', emoji: '💚', range: '$15-30' },
     'standard': { label: 'Standard', emoji: '💛', range: '$30-75' },
-    'treat-ourselves': { label: 'Treat Ourselves', emoji: '💎', range: '$75+' },
+    'premium': { label: 'Premium', emoji: '✨', range: '$75-150' },
+    'treat-ourselves': { label: 'Treat Ourselves', emoji: '💎', range: '$150-250' },
+    'splurge': { label: 'Splurge', emoji: '👑', range: '$250+' },
 };
 
 export const TIME_WINDOW_DEFINITIONS: Record<TimeWindow, { label: string; emoji: string }> = {
