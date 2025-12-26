@@ -550,7 +550,7 @@ export function calculateOverlap<T>(arr1: T[], arr2: T[]): T[] {
 export function calculateOverlapScore(arr1: string[], arr2: string[]): number {
     if (arr1.length === 0 && arr2.length === 0) return 1;
     const overlap = calculateOverlap(arr1, arr2);
-    const union = [...new Set([...arr1, ...arr2])];
+    const union = Array.from(new Set([...arr1, ...arr2]));
     return union.length > 0 ? overlap.length / union.length : 0;
 }
 
