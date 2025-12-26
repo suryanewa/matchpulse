@@ -97,7 +97,7 @@ export default function HelpPage() {
                     </div>
                     <h3 className="text-xl font-bold text-white mb-2">No results found</h3>
                     <p className="text-gray-500 max-w-md mx-auto">
-                        We couldn't find any articles or FAQs matching "{searchQuery}". Try using different keywords or browse the categories below.
+                        We couldn&apos;t find any articles or FAQs matching &quot;{searchQuery}&quot;. Try using different keywords or browse the categories below.
                     </p>
                 </div>
             ) : (

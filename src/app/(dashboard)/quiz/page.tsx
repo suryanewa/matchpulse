@@ -28,7 +28,7 @@ function QuizLanding({ onStart }: { onStart: () => void }) {
                 </div>
 
                 <h1 className="mb-4 text-4xl font-bold text-white">
-                    What's Your{' '}
+                    What&apos;s Your{' '}
                     <span className="bg-gradient-to-r from-[#FE3C72] to-[#FF6B6B] bg-clip-text text-transparent">
                         Dating Style
                     </span>

@@ -164,7 +164,7 @@ export default function AboutPage() {
                     <div>
                         <h3 className="text-lg font-bold text-white mb-2">Demo Mode</h3>
                         <p className="text-gray-400 leading-relaxed">
-                            This dashboard is currently running with <strong className="text-amber-400">representative sample data</strong> to demonstrate the platform's capabilities.
+                            This dashboard is currently running with <strong className="text-amber-400">representative sample data</strong> to demonstrate the platform&apos;s capabilities.
                             The trends, personas, and opportunities shown are based on real cultural patterns but are not live-updated.
                         </p>
                     </div>

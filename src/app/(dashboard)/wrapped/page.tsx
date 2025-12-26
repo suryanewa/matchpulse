@@ -549,7 +549,7 @@ function OutroSlide() {
                 transition={{ delay: 0.4 }}
                 className="text-4xl font-black text-white mb-4"
             >
-                Here's to more adventures
+                Here&apos;s to more adventures
             </motion.h2>
             <motion.p
                 initial={{ opacity: 0 }}

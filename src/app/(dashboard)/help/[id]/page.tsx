@@ -90,7 +90,7 @@ export default function GuideDetailPage() {
                     <div className="pt-10 border-t border-[#222] flex flex-col md:flex-row gap-6 items-center justify-between text-center md:text-left">
                         <div className="space-y-1">
                             <h4 className="text-white font-bold">Found this helpful?</h4>
-                            <p className="text-sm text-gray-500">Explore more guides to unlock MatchPulse's full potential.</p>
+                            <p className="text-sm text-gray-500">Explore more guides to unlock MatchPulse&apos;s full potential.</p>
                         </div>
                         <Link
                             href="/help"

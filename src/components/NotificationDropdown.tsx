@@ -136,7 +136,7 @@ export function NotificationDropdown({
                             </div>
                             <h4 className="mb-1 text-sm font-bold text-white">No notifications</h4>
                             <p className="text-xs text-gray-500">
-                                We'll notify you when new trends or insights are detected.
+                                We&apos;ll notify you when new trends or insights are detected.
                             </p>
                         </div>
                     )}

@@ -109,7 +109,7 @@ export function Header() {
                                 <div className="p-6 text-center">
                                     <div className="text-2xl mb-2">🔍</div>
                                     <p className="text-sm text-gray-500">
-                                        No results found for "{searchQuery}"
+                                        No results found for &quot;{searchQuery}&quot;
                                     </p>
                                 </div>
                             ) : (

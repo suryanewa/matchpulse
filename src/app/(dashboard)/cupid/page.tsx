@@ -193,7 +193,7 @@ function VibesStep({
         >
             <div className="mb-8 text-center">
                 <Sparkles className="mx-auto mb-4 h-10 w-10 text-[#FE3C72]" />
-                <h2 className="mb-2 text-2xl font-bold text-white">What's your vibe?</h2>
+                <h2 className="mb-2 text-2xl font-bold text-white">What&apos;s your vibe?</h2>
                 <p className="text-gray-400">Pick the moods that describe your ideal date (at least 2)</p>
             </div>
 
@@ -271,7 +271,7 @@ function BudgetStep({
         >
             <div className="mb-8 text-center">
                 <Wallet className="mx-auto mb-4 h-10 w-10 text-[#FE3C72]" />
-                <h2 className="mb-2 text-2xl font-bold text-white">What's your budget range?</h2>
+                <h2 className="mb-2 text-2xl font-bold text-white">What&apos;s your budget range?</h2>
                 <p className="text-gray-400">Select all that apply</p>
             </div>
 
