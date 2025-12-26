@@ -67,7 +67,8 @@ export function OpportunityCard({ opportunity, onStatusChange, timeFilter = '30d
     return (
         <motion.article
             layout
-            className="group overflow-hidden rounded-3xl bg-[#1a1a1a] transition-all hover:bg-[#222] shadow-lg hover:shadow-xl hover:shadow-black/50"
+            whileHover={{ y: -4, transition: { duration: 0.15, ease: 'easeOut' } }}
+            className="group overflow-hidden rounded-3xl bg-[#1a1a1a] transition-[background-color,box-shadow] duration-150 ease-out hover:bg-[#222] shadow-lg hover:shadow-xl hover:shadow-black/50"
         >
             {/* Main Content */}
             <div className="p-5">
@@ -77,24 +78,12 @@ export function OpportunityCard({ opportunity, onStatusChange, timeFilter = '30d
                         <div className="space-y-3">
                             {/* Status/Severity/Confidence Row */}
                             <div className="flex flex-wrap items-center gap-2">
-                                {/* Severity Badge - Tinder style */}
-                                <span className={cn(
-                                    'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase',
-                                    opportunity.severity === 'critical' && 'bg-gradient-to-r from-rose-500 to-red-500 text-white',
-                                    opportunity.severity === 'high' && 'bg-gradient-to-r from-orange-500 to-amber-500 text-white',
-                                    opportunity.severity === 'medium' && 'bg-gradient-to-r from-yellow-500 to-amber-400 text-black',
-                                    opportunity.severity === 'low' && 'bg-[#2a2a2a] text-gray-400'
-                                )}>
+                                {/* Severity Badge - Tinder red */}
+                                <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase bg-[#FE3C72] text-white">
                                     {opportunity.severity}
                                 </span>
-                                {/* Status Badge */}
-                                <span className={cn(
-                                    'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase',
-                                    opportunity.status === 'new' && 'bg-[#FE3C72] text-white',
-                                    opportunity.status === 'reviewed' && 'bg-emerald-500 text-white',
-                                    opportunity.status === 'in_discovery' && 'bg-purple-500 text-white',
-                                    opportunity.status === 'not_relevant' && 'bg-gray-600 text-gray-300'
-                                )}>
+                                {/* Status Badge - Tinder red */}
+                                <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase bg-[#FE3C72] text-white">
                                     {opportunity.status.replace('_', ' ')}
                                 </span>
                                 {/* Confidence */}

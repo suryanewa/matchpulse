@@ -12,22 +12,22 @@ import {
     Settings,
     HelpCircle,
     Info,
-    Heart,
+    Target,
     Gift
 } from 'lucide-react'
 
 const navItems = [
     {
-        label: 'Behaviors',
-        href: '/behaviors',
-        icon: TrendingUp,
-        description: 'Emerging dating trends',
-    },
-    {
         label: 'Personas',
         href: '/personas',
         icon: Users,
         description: 'Dating archetypes',
+    },
+    {
+        label: 'Behaviors',
+        href: '/behaviors',
+        icon: TrendingUp,
+        description: 'Emerging dating trends',
     },
     {
         label: 'Opportunities',
@@ -41,7 +41,7 @@ const publicNavItems = [
     {
         label: 'Cupid',
         href: '/cupid',
-        icon: Heart,
+        icon: Target,
         description: 'Date planner',
     },
     {
@@ -49,6 +49,12 @@ const publicNavItems = [
         href: '/wrapped',
         icon: Gift,
         description: 'Relationship recap',
+    },
+    {
+        label: 'Quiz',
+        href: '/quiz',
+        icon: Sparkles,
+        description: 'Dating persona quiz',
     },
 ]
 
@@ -93,7 +99,7 @@ export function Sidebar() {
                 {/* Main Navigation */}
                 <nav className="flex-1 space-y-1 px-3 py-4">
                     <div className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                        Insights
+                        Dashboard
                     </div>
                     {navItems.map((item) => {
                         const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
@@ -142,21 +148,6 @@ export function Sidebar() {
                             </Link>
                         )
                     })}
-                    <Link
-                        href="/quiz"
-                        className={cn(
-                            'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all',
-                            pathname.startsWith('/quiz')
-                                ? 'bg-gradient-to-r from-[#FE3C72]/20 to-[#FF6B6B]/10 text-white'
-                                : 'text-gray-400 hover:bg-[#1a1a1a] hover:text-white'
-                        )}
-                    >
-                        <Sparkles className={cn(
-                            'h-5 w-5 transition-colors',
-                            pathname.startsWith('/quiz') ? 'text-[#FE3C72]' : 'text-gray-500'
-                        )} />
-                        <span>Quiz</span>
-                    </Link>
                 </nav>
 
                 {/* Bottom Navigation */}

@@ -182,15 +182,15 @@ export function Header() {
                     <button
                         onClick={() => setShowNotifications(!showNotifications)}
                         className={cn(
-                            "relative flex h-10 w-10 items-center justify-center rounded-lg border transition-all",
+                            "relative flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-150",
                             showNotifications
-                                ? "border-pulse-500 bg-pulse-500/10 text-white"
-                                : "border-surface-700 bg-surface-900 text-surface-400 hover:bg-surface-800 hover:text-white"
+                                ? "bg-[#FE3C72]/10 text-[#FE3C72]"
+                                : "bg-[#1a1a1a] text-gray-400 hover:bg-[#222] hover:text-white"
                         )}
                     >
                         <Bell className="h-5 w-5" />
                         {unreadCount > 0 && (
-                            <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-pulse-500 text-[10px] font-bold text-white shadow-[0_0_8px_rgba(236,72,153,0.5)]">
+                            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#FE3C72] text-[10px] font-bold text-white shadow-lg shadow-[#FE3C72]/30">
                                 {unreadCount}
                             </span>
                         )}
@@ -213,10 +213,10 @@ export function Header() {
                     <button
                         onClick={() => setShowUserMenu(!showUserMenu)}
                         className={cn(
-                            "flex h-10 w-10 items-center justify-center rounded-full transition-all shadow-lg hover:scale-105",
+                            "flex h-10 w-10 items-center justify-center rounded-full transition-all duration-150",
                             showUserMenu
-                                ? "ring-2 ring-pulse-500 ring-offset-2 ring-offset-surface-950"
-                                : "bg-gradient-to-br from-pulse-500 to-accent-500 text-white shadow-pulse-500/20"
+                                ? "ring-2 ring-[#FE3C72] ring-offset-2 ring-offset-[#111]"
+                                : "bg-gradient-to-br from-[#FE3C72] to-[#FF6B6B] text-white shadow-lg shadow-[#FE3C72]/20 hover:shadow-[#FE3C72]/40"
                         )}
                     >
                         <User className="h-5 w-5" />
@@ -228,38 +228,45 @@ export function Header() {
                                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                className="absolute right-0 mt-2 w-64 overflow-hidden rounded-xl border border-surface-800 bg-surface-900/95 p-2 shadow-2xl backdrop-blur-xl"
+                                transition={{ duration: 0.15, ease: 'easeOut' }}
+                                className="absolute right-0 mt-2 w-72 overflow-hidden rounded-2xl bg-[#1a1a1a] shadow-2xl shadow-black/50"
                             >
-                                <div className="p-3 mb-1">
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-pulse-500 to-accent-500 text-white shadow-lg">
-                                            <User className="h-5 w-5" />
+                                {/* Profile Header */}
+                                <div className="bg-[#222] p-5">
+                                    <div className="flex items-center gap-4 mb-4">
+                                        <div className="relative">
+                                            <div className="h-14 w-14 rounded-full bg-gradient-to-br from-[#FE3C72] to-[#FF6B6B] p-0.5">
+                                                <div className="flex h-full w-full items-center justify-center rounded-full bg-[#1a1a1a]">
+                                                    <User className="h-6 w-6 text-gray-400" />
+                                                </div>
+                                            </div>
                                         </div>
                                         <div>
-                                            <p className="text-sm font-bold text-white uppercase tracking-wider">Surya Newa</p>
-                                            <p className="text-xs text-surface-500">newa@nyu.edu</p>
+                                            <p className="text-base font-bold text-white">Surya Newa</p>
+                                            <p className="text-sm text-gray-500">newa@nyu.edu</p>
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center justify-between rounded-lg bg-pulse-500/10 border border-pulse-500/20 px-3 py-2">
+                                    <div className="flex items-center justify-between rounded-xl bg-[#FE3C72]/10 px-4 py-2.5">
                                         <div className="flex items-center gap-2">
-                                            <div className="h-1.5 w-1.5 rounded-full bg-pulse-500 animate-pulse" />
-                                            <span className="text-[10px] font-bold uppercase tracking-widest text-pulse-400">Demo Account</span>
+                                            <div className="h-2 w-2 rounded-full bg-[#FE3C72] animate-pulse" />
+                                            <span className="text-xs font-bold text-[#FE3C72]">DEMO ACCOUNT</span>
                                         </div>
-                                        <span className="text-[10px] text-surface-500 uppercase tracking-widest">Active</span>
+                                        <span className="rounded-full bg-[#2a2a2a] px-2.5 py-1 text-[10px] font-medium text-gray-400">ACTIVE</span>
                                     </div>
                                 </div>
 
-                                <div className="border-t border-surface-800 pt-1">
+                                {/* Menu Items */}
+                                <div className="p-2">
                                     <Link
                                         href="/settings"
                                         onClick={() => setShowUserMenu(false)}
-                                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-surface-400 transition-colors hover:bg-surface-800 hover:text-white"
+                                        className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-gray-300 transition-colors duration-150 hover:bg-[#222] hover:text-white"
                                     >
-                                        <span className="text-xs font-semibold uppercase tracking-wider">View Profile</span>
+                                        <span className="text-sm font-medium">View Profile</span>
                                     </Link>
-                                    <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-red-400 transition-colors hover:bg-red-500/10">
-                                        <span className="text-xs font-semibold uppercase tracking-wider">Sign Out</span>
+                                    <button className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-red-400 transition-colors duration-150 hover:bg-red-500/10">
+                                        <span className="text-sm font-medium">Sign Out</span>
                                     </button>
                                 </div>
                             </motion.div>

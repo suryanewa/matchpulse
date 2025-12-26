@@ -8,7 +8,7 @@ import { useCupid } from '@/context/CupidContext'
 import { ARCHETYPE_DEFINITIONS, VIBE_DEFINITIONS, TIME_WINDOW_DEFINITIONS } from '@/data/cupid-data'
 import { cn } from '@/lib/utils'
 
-const FULL_WRAPPED_THRESHOLD = 10
+const FULL_WRAPPED_THRESHOLD = 5
 
 // ============================================
 // Wrapped Card Components
@@ -311,12 +311,11 @@ export default function WrappedPage() {
     }, [state.completedDates, wrappedData, generateWrapped])
 
     const completedDates = getCompletedDates()
-    const isFullWrapped = completedDates.length >= FULL_WRAPPED_THRESHOLD
 
     // Not ready state
     if (!state.isOnboarded) {
         return (
-            <div className="flex min-h-screen flex-col items-center justify-center px-6">
+            <div className="flex flex-col items-center justify-center px-6 py-20">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -340,11 +339,11 @@ export default function WrappedPage() {
         )
     }
 
-    // Not enough dates - needs at least 3 for preview
-    if (completedDates.length < 3) {
-        const remaining = 3 - completedDates.length
+    // Not enough dates - needs at least 5 for Wrapped
+    if (completedDates.length < FULL_WRAPPED_THRESHOLD) {
+        const remaining = FULL_WRAPPED_THRESHOLD - completedDates.length
         return (
-            <div className="flex min-h-screen flex-col items-center justify-center px-6">
+            <div className="flex flex-col items-center justify-center px-6 py-20">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -359,10 +358,10 @@ export default function WrappedPage() {
                     </motion.div>
                     <h1 className="mb-4 text-3xl font-black text-white">Almost There!</h1>
                     <p className="mb-2 text-surface-400">
-                        Log <span className="font-bold text-purple-400">{remaining} more date{remaining > 1 ? 's' : ''}</span> to see a preview
+                        Log <span className="font-bold text-purple-400">{remaining} more date{remaining > 1 ? 's' : ''}</span> to unlock your Wrapped
                     </p>
                     <p className="mb-8 text-sm text-surface-500">
-                        Full Wrapped unlocks at {FULL_WRAPPED_THRESHOLD} dates
+                        Wrapped unlocks at {FULL_WRAPPED_THRESHOLD} dates
                     </p>
 
                     {/* Progress bar */}
@@ -390,7 +389,7 @@ export default function WrappedPage() {
         const data = generateWrapped()
         if (data) setWrappedData(data)
         return (
-            <div className="flex min-h-screen items-center justify-center">
+            <div className="flex items-center justify-center py-20">
                 <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
@@ -401,7 +400,7 @@ export default function WrappedPage() {
     }
 
     return (
-        <div className="min-h-screen px-6 py-8">
+        <div className="px-6 py-8">
             <div className="mx-auto max-w-2xl">
                 {/* Unlock Animation Overlay */}
                 <AnimatePresence>
@@ -446,86 +445,35 @@ export default function WrappedPage() {
                 >
                     <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-purple-500/10 px-4 py-2 text-sm text-purple-300">
                         <Sparkles className="h-4 w-4" />
-                        {isFullWrapped ? '2024 Relationship Wrapped' : 'Wrapped Preview'}
+                        2024 Relationship Wrapped
                     </div>
                     <h1 className="text-4xl font-black text-white">
                         Your Year in <span className="bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent">Dates</span>
                     </h1>
-                    {!isFullWrapped && (
-                        <p className="mt-2 text-surface-400">
-                            Log {FULL_WRAPPED_THRESHOLD - completedDates.length} more date{FULL_WRAPPED_THRESHOLD - completedDates.length !== 1 ? 's' : ''} to unlock the full experience!
-                        </p>
-                    )}
                 </motion.div>
 
                 {/* Full Wrapped Slideshow */}
-                {isFullWrapped ? (
-                    <>
-                        <WrappedSlideshow wrappedData={wrappedData} />
+                <WrappedSlideshow wrappedData={wrappedData} />
 
-                        {/* Share Button */}
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.5 }}
-                            className="mt-8 flex justify-center gap-4"
-                        >
-                            <button className="flex items-center gap-2 rounded-full bg-white px-6 py-3 font-semibold text-surface-900 transition-all hover:bg-surface-100">
-                                <Share2 className="h-4 w-4" />
-                                Share Wrapped
-                            </button>
-                            <Link
-                                href="/cupid"
-                                className="flex items-center gap-2 rounded-full border border-surface-600 px-6 py-3 font-semibold text-surface-300 transition-all hover:bg-surface-800"
-                            >
-                                <RotateCcw className="h-4 w-4" />
-                                Back to Cupid
-                            </Link>
-                        </motion.div>
-                    </>
-                ) : (
-                    /* Preview Mode - Simplified View */
-                    <>
-                        <div className="mb-8">
-                            <ArchetypeCard archetype={wrappedData.archetype} />
-                        </div>
-
-                        <div className="mb-8 grid grid-cols-2 gap-4">
-                            <StatCard icon={Heart} value={wrappedData.totalDatesCompleted} label="Dates Together" color="from-pink-500 to-rose-500" delay={0.1} />
-                            <StatCard icon={Star} value={wrappedData.averageRating} label="Avg Rating" color="from-amber-500 to-orange-500" delay={0.2} />
-                        </div>
-
-                        {/* Unlock Progress */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3 }}
-                            className="mb-8 rounded-2xl border border-purple-500/30 bg-purple-500/10 p-6 text-center"
-                        >
-                            <Gift className="mx-auto mb-3 h-8 w-8 text-purple-400" />
-                            <h3 className="mb-2 font-bold text-white">
-                                {FULL_WRAPPED_THRESHOLD - completedDates.length} dates to full Wrapped
-                            </h3>
-                            <div className="mx-auto h-3 w-full max-w-xs overflow-hidden rounded-full bg-surface-800">
-                                <motion.div
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${(completedDates.length / FULL_WRAPPED_THRESHOLD) * 100}%` }}
-                                    className="h-full rounded-full bg-gradient-to-r from-violet-500 to-purple-500"
-                                />
-                            </div>
-                            <p className="mt-2 text-sm text-surface-500">{completedDates.length} / {FULL_WRAPPED_THRESHOLD} dates logged</p>
-                        </motion.div>
-
-                        <div className="flex justify-center">
-                            <Link
-                                href="/cupid"
-                                className="flex items-center gap-2 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 px-6 py-3 font-semibold text-white"
-                            >
-                                Log More Dates <ArrowRight className="h-4 w-4" />
-                            </Link>
-                        </div>
-                    </>
-                )}
+                {/* Share Button */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                    className="mt-8 flex justify-center gap-4"
+                >
+                    <button className="flex items-center gap-2 rounded-full bg-white px-6 py-3 font-semibold text-surface-900 transition-all hover:bg-surface-100">
+                        <Share2 className="h-4 w-4" />
+                        Share Wrapped
+                    </button>
+                    <Link
+                        href="/cupid"
+                        className="flex items-center gap-2 rounded-full border border-surface-600 px-6 py-3 font-semibold text-surface-300 transition-all hover:bg-surface-800"
+                    >
+                        <RotateCcw className="h-4 w-4" />
+                        Back to Cupid
+                    </Link>
+                </motion.div>
             </div>
         </div>
     )

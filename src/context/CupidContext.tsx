@@ -41,11 +41,12 @@ interface CupidContextType {
 
     // Actions - Dates
     getRecommendations: () => DateSuggestion[]
-    fetchRecommendations: () => Promise<void>
+    fetchRecommendations: (append?: boolean) => Promise<void>
     saveDate: (dateId: string) => void
     unsaveDate: (dateId: string) => void
     markCompleted: (dateId: string) => void
     markNotOurVibe: (dateId: string) => void
+    dismissDate: (dateId: string) => void
 
     // Actions - Logging
     logDate: (log: Omit<DateLog, 'id'>) => void
@@ -75,6 +76,7 @@ const defaultState: CupidState = {
     savedDates: [],
     completedDates: [],
     notOurVibeDates: [],
+    dismissedDates: [],
     wrappedData: null,
     wrappedUnlocked: false,
 }
@@ -161,7 +163,7 @@ export function CupidProvider({ children }: { children: React.ReactNode }) {
     // API-Based Recommendations
     // ============================================
 
-    const fetchRecommendations = useCallback(async () => {
+    const fetchRecommendations = useCallback(async (append: boolean = false) => {
         if (!state.userPreferences) {
             console.log('No user preferences, skipping fetch')
             return
@@ -171,6 +173,9 @@ export function CupidProvider({ children }: { children: React.ReactNode }) {
         setRecommendationsError(null)
 
         try {
+            // Get existing IDs to exclude from new fetch
+            const existingIds = append ? recommendations.map(r => r.id) : []
+
             const response = await fetch('/api/cupid/recommendations', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -179,7 +184,8 @@ export function CupidProvider({ children }: { children: React.ReactNode }) {
                     budgetTiers: state.userPreferences.budgetTiers,
                     neighborhoods: state.userPreferences.neighborhoods,
                     timeWindows: state.userPreferences.timeWindows,
-                    cuisines: state.userPreferences.cuisines
+                    cuisines: state.userPreferences.cuisines,
+                    excludeIds: existingIds
                 })
             })
 
@@ -196,24 +202,28 @@ export function CupidProvider({ children }: { children: React.ReactNode }) {
                 isSaved: state.savedDates.includes(rec.id),
                 isCompleted: state.completedDates.some(d => d.dateIdeaId === rec.id),
                 notOurVibe: state.notOurVibeDates.includes(rec.id)
-            })).filter((rec: DateSuggestion) => !rec.notOurVibe)
+            })).filter((rec: DateSuggestion) => !rec.notOurVibe && !existingIds.includes(rec.id))
 
-            setRecommendations(enrichedRecs)
-            localStorage.setItem('cupid-recommendations', JSON.stringify(enrichedRecs))
+            // Append or replace
+            const newRecs = append ? [...recommendations, ...enrichedRecs] : enrichedRecs
+            setRecommendations(newRecs)
+            localStorage.setItem('cupid-recommendations', JSON.stringify(newRecs))
 
-            console.log(`Fetched ${enrichedRecs.length} recommendations from API`)
+            console.log(`Fetched ${enrichedRecs.length} recommendations from API${append ? ' (appended)' : ''}`)
         } catch (error) {
             console.error('Failed to fetch recommendations:', error)
             setRecommendationsError(error instanceof Error ? error.message : 'Failed to load recommendations')
 
-            // Fallback to mock data
-            console.log('Using mock data as fallback')
-            const mockRecs = getMockRecommendations()
-            setRecommendations(mockRecs)
+            // Fallback to mock data only if not appending
+            if (!append) {
+                console.log('Using mock data as fallback')
+                const mockRecs = getMockRecommendations()
+                setRecommendations(mockRecs)
+            }
         } finally {
             setIsLoadingRecommendations(false)
         }
-    }, [state.userPreferences, state.savedDates, state.completedDates, state.notOurVibeDates])
+    }, [state.userPreferences, state.savedDates, state.completedDates, state.notOurVibeDates, recommendations])
 
     // Fallback mock recommendations
     const getMockRecommendations = useCallback((): DateSuggestion[] => {
@@ -273,12 +283,13 @@ export function CupidProvider({ children }: { children: React.ReactNode }) {
 
     const getRecommendations = useCallback((): DateSuggestion[] => {
         // Return cached recommendations with updated user state
+        const dismissedDates = state.dismissedDates || []
         return recommendations.map(rec => ({
             ...rec,
             isSaved: state.savedDates.includes(rec.id),
             isCompleted: state.completedDates.some(d => d.dateIdeaId === rec.id),
-        })).filter(rec => !state.notOurVibeDates.includes(rec.id))
-    }, [recommendations, state.savedDates, state.completedDates, state.notOurVibeDates])
+        })).filter(rec => !state.notOurVibeDates.includes(rec.id) && !dismissedDates.includes(rec.id))
+    }, [recommendations, state.savedDates, state.completedDates, state.notOurVibeDates, state.dismissedDates])
 
     // ============================================
     // Date Actions
@@ -309,6 +320,14 @@ export function CupidProvider({ children }: { children: React.ReactNode }) {
         setState(prev => ({
             ...prev,
             notOurVibeDates: Array.from(new Set([...prev.notOurVibeDates, dateId])),
+            savedDates: prev.savedDates.filter(id => id !== dateId)
+        }))
+    }, [])
+
+    const dismissDate = useCallback((dateId: string) => {
+        setState(prev => ({
+            ...prev,
+            dismissedDates: Array.from(new Set([...prev.dismissedDates, dateId])),
             savedDates: prev.savedDates.filter(id => id !== dateId)
         }))
     }, [])
@@ -431,6 +450,7 @@ export function CupidProvider({ children }: { children: React.ReactNode }) {
         unsaveDate,
         markCompleted,
         markNotOurVibe,
+        dismissDate,
         logDate,
         generateWrapped,
         getSavedDates,

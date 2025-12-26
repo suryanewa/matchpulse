@@ -5,15 +5,34 @@ import { getPersonaById, contentSources } from '@/data/mock-data'
 import { Sparkline } from '@/components/ui/Sparkline'
 import { formatNumber, formatGrowth, cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
-import { X, ArrowRight, Bookmark, Heart, ExternalLink, TrendingUp, TrendingDown } from 'lucide-react'
+import { X, ArrowRight, Heart, ExternalLink, TrendingUp, TrendingDown } from 'lucide-react'
 import { useDashboard } from '@/context/DashboardContext'
 import { createPortal } from 'react-dom'
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 
 interface BehaviorDetailDrawerProps {
     trend: BehaviorTrend | null
     onClose: () => void
 }
+
+const TikTokIcon = ({ className }: { className?: string }) => (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.03-2.86-.31-4.13-1.03-2.28-1.3-3.6-3.81-3.23-6.39.14-1.28.6-2.5 1.39-3.51.83-1.05 1.93-1.86 3.19-2.35 1.28-.5 2.67-.61 4.03-.3v3.95c-1.18-.25-2.42-.03-3.4.67-1.14.81-1.6 2.22-1.14 3.5.42 1.2 1.66 2.05 2.94 1.96 1.47-.03 2.66-1.18 2.8-2.65.1-1.14.02-2.3.02-3.45V0h.01z" />
+    </svg>
+)
+
+const RedditIcon = ({ className }: { className?: string }) => (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z" />
+    </svg>
+)
+
+const XIcon = ({ className }: { className?: string }) => (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932 6.064-6.932zm-1.294 19.497h2.039L6.482 2.395H4.293l13.314 18.255z" />
+    </svg>
+)
 
 export function BehaviorDetailDrawer({ trend, onClose }: BehaviorDetailDrawerProps) {
     const { savedTrendIds, toggleSaveTrend, timeFilter } = useDashboard()
@@ -56,9 +75,9 @@ export function BehaviorDetailDrawer({ trend, onClose }: BehaviorDetailDrawerPro
             >
                 {/* Header - Tinder style */}
                 <div className="flex-shrink-0 flex items-center justify-between bg-[#1a1a1a] p-5">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
                         <div className={cn(
-                            'flex h-12 w-12 items-center justify-center rounded-xl',
+                            'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl',
                             isPositiveGrowth
                                 ? 'bg-gradient-to-br from-emerald-500 to-teal-500'
                                 : 'bg-gradient-to-br from-rose-500 to-red-500'
@@ -69,20 +88,11 @@ export function BehaviorDetailDrawer({ trend, onClose }: BehaviorDetailDrawerPro
                                 <TrendingDown className="h-6 w-6 text-white" />
                             )}
                         </div>
-                        <div>
-                            <span className="text-xs text-gray-500">Behavior Trend</span>
-                            <div className="flex items-center gap-2">
-                                <span className={cn(
-                                    'text-lg font-bold',
-                                    isPositiveGrowth ? 'text-emerald-400' : 'text-rose-400'
-                                )}>
-                                    {formatGrowth(trend.growthRate)}
-                                </span>
-                                <span className="text-xs text-gray-500">vs last period</span>
-                            </div>
-                        </div>
+                        <h2 className="text-lg font-bold text-white truncate">
+                            {trend.title}
+                        </h2>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 shrink-0 ml-3">
                         <button
                             onClick={() => toggleSaveTrend(trend.id)}
                             className={cn(
@@ -95,7 +105,7 @@ export function BehaviorDetailDrawer({ trend, onClose }: BehaviorDetailDrawerPro
                             {isSaved ? (
                                 <Heart className="h-5 w-5 fill-current" />
                             ) : (
-                                <Bookmark className="h-5 w-5" />
+                                <Heart className="h-5 w-5" />
                             )}
                         </button>
                         <button
@@ -109,15 +119,10 @@ export function BehaviorDetailDrawer({ trend, onClose }: BehaviorDetailDrawerPro
 
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-5 space-y-6">
-                    {/* Title & Description */}
-                    <div>
-                        <h2 className="mb-3 text-2xl font-bold text-white">
-                            {trend.title}
-                        </h2>
-                        <p className="text-gray-400 leading-relaxed">
-                            {trend.description}
-                        </p>
-                    </div>
+                    {/* Description */}
+                    <p className="text-gray-400 leading-relaxed">
+                        {trend.description}
+                    </p>
 
                     {/* Stats Grid - Tinder style cards */}
                     <div className="grid grid-cols-3 gap-3">
@@ -175,15 +180,24 @@ export function BehaviorDetailDrawer({ trend, onClose }: BehaviorDetailDrawerPro
                                 const source = contentSources.find(s => s.id === platform.sourceId)
                                 return (
                                     <div key={platform.sourceId} className="flex items-center gap-3">
-                                        <span className="text-xl">{source?.icon}</span>
-                                        <span className="w-20 text-sm text-gray-300">{source?.name}</span>
+                                        <div className="flex h-8 w-8 items-center justify-center text-gray-400">
+                                            {platform.sourceId === 'tiktok' && <TikTokIcon className="h-4 w-4" />}
+                                            {platform.sourceId === 'reddit' && <RedditIcon className="h-5 w-5" />}
+                                            {platform.sourceId === 'twitter' && <XIcon className="h-4 w-4" />}
+                                        </div>
+                                        <span className="w-20 text-sm font-medium text-gray-300">{source?.name}</span>
                                         <div className="flex-1">
                                             <div className="h-2.5 overflow-hidden rounded-full bg-[#2a2a2a]">
                                                 <motion.div
                                                     initial={{ width: 0 }}
                                                     animate={{ width: `${platform.percentage}%` }}
                                                     transition={{ duration: 1, delay: 0.2 }}
-                                                    className="h-full rounded-full bg-gradient-to-r from-[#FE3C72] to-[#FF6B6B]"
+                                                    className={cn(
+                                                        'h-full rounded-full bg-gradient-to-r',
+                                                        isPositiveGrowth
+                                                            ? 'from-emerald-500 to-teal-500'
+                                                            : 'from-rose-500 to-red-500'
+                                                    )}
                                                 />
                                             </div>
                                         </div>
@@ -205,7 +219,7 @@ export function BehaviorDetailDrawer({ trend, onClose }: BehaviorDetailDrawerPro
                             {trend.topPhrases.map((phrase) => (
                                 <span
                                     key={phrase}
-                                    className="rounded-full bg-gradient-to-r from-[#FE3C72] to-[#FF6B6B] px-4 py-2 text-sm font-semibold text-white"
+                                    className="rounded-full bg-[#2a2a2a] px-4 py-2 text-sm font-medium text-gray-300"
                                 >
                                     {phrase}
                                 </span>
@@ -223,27 +237,28 @@ export function BehaviorDetailDrawer({ trend, onClose }: BehaviorDetailDrawerPro
                                 const persona = getPersonaById(link.personaId)
                                 if (!persona) return null
                                 return (
-                                    <div
+                                    <Link
                                         key={link.personaId}
-                                        className="flex items-center justify-between rounded-2xl bg-[#1a1a1a] p-4 transition-colors hover:bg-[#222]"
+                                        href={`/personas/${link.personaId}`}
+                                        className="flex items-center justify-between rounded-2xl bg-[#1a1a1a] p-4 transition-colors hover:bg-[#222] group"
                                     >
                                         <div className="flex items-center gap-3">
                                             <span className="text-3xl">{persona.emoji}</span>
                                             <div>
-                                                <div className="font-semibold text-white">{persona.name}</div>
-                                                <div className="text-xs text-gray-500">{persona.tagline}</div>
+                                                <div className="font-semibold text-white group-hover:text-white">{persona.name}</div>
+                                                <div className="text-xs text-gray-400">{persona.tagline}</div>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <div className="text-right">
-                                                <div className="text-lg font-bold text-[#FE3C72]">
+                                                <div className="text-lg font-bold text-white">
                                                     {(link.confidence * 100).toFixed(0)}%
                                                 </div>
                                                 <div className="text-xs text-gray-500">match</div>
                                             </div>
-                                            <ArrowRight className="h-5 w-5 text-gray-600" />
+                                            <ArrowRight className="h-5 w-5 text-gray-600 transition-transform group-hover:translate-x-1" />
                                         </div>
-                                    </div>
+                                    </Link>
                                 )
                             })}
                         </div>

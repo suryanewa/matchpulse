@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Star, Check, Heart, MapPin, Bookmark, CheckCircle2 } from 'lucide-react'
+import { X, Star, Check, Heart, MapPin, CheckCircle2 } from 'lucide-react'
 import { DateSuggestion, DateLog, DateLogTag } from '@/types/cupid'
-import { DATE_LOG_TAG_DEFINITIONS, VIBE_DEFINITIONS } from '@/data/cupid-data'
+import { DATE_LOG_TAG_DEFINITIONS } from '@/data/cupid-data'
 import { cn } from '@/lib/utils'
 
 interface DateCardProps {
@@ -13,9 +13,10 @@ interface DateCardProps {
     onUnsave: (id: string) => void
     onComplete: (log: Omit<DateLog, 'id'>) => void
     onNotOurVibe: (id: string) => void
+    onDismiss?: (id: string) => void
 }
 
-export function DateCard({ date, onSave, onUnsave, onComplete, onNotOurVibe }: DateCardProps) {
+export function DateCard({ date, onSave, onUnsave, onComplete, onNotOurVibe, onDismiss }: DateCardProps) {
     const [showLogModal, setShowLogModal] = useState(false)
 
     // Extract rating and review count from description
@@ -29,8 +30,19 @@ export function DateCard({ date, onSave, onUnsave, onComplete, onNotOurVibe }: D
             <motion.div
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="group relative overflow-hidden rounded-2xl bg-[#1a1a1a] transition-all duration-200 hover:bg-[#222]"
+                exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                whileHover={{ y: -4, transition: { duration: 0.15, ease: 'easeOut' } }}
+                className="group relative overflow-hidden rounded-2xl bg-[#1a1a1a] transition-[background-color,box-shadow] duration-150 ease-out hover:bg-[#222] hover:shadow-xl hover:shadow-black/50"
             >
+                {/* Dismiss X Button */}
+                {onDismiss && (
+                    <button
+                        onClick={() => onDismiss(date.id)}
+                        className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-gray-400 opacity-0 transition-all hover:bg-black/70 hover:text-white group-hover:opacity-100"
+                    >
+                        <X className="h-4 w-4" />
+                    </button>
+                )}
                 {/* Photo Header - if available */}
                 {date.photoUrl && (
                     <div className="relative h-32 w-full overflow-hidden">
@@ -40,24 +52,15 @@ export function DateCard({ date, onSave, onUnsave, onComplete, onNotOurVibe }: D
                             className="h-full w-full object-cover"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] to-transparent" />
-                        {/* Budget Badge */}
-                        <span className="absolute right-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
-                            {date.estimatedCost}
-                        </span>
                     </div>
                 )}
 
                 <div className="p-4">
                     {/* Title Row */}
-                    <div className="mb-2 flex items-start justify-between gap-3">
+                    <div className="mb-2">
                         <h3 className="text-lg font-bold leading-tight text-white">
                             {date.title}
                         </h3>
-                        {!date.photoUrl && (
-                            <span className="shrink-0 rounded-full bg-[#2a2a2a] px-2.5 py-1 text-xs font-medium text-gray-400">
-                                {date.estimatedCost}
-                            </span>
-                        )}
                     </div>
 
                     {/* Location & Rating */}
@@ -75,22 +78,6 @@ export function DateCard({ date, onSave, onUnsave, onComplete, onNotOurVibe }: D
                                 )}
                             </span>
                         )}
-                    </div>
-
-                    {/* Vibe Tags */}
-                    <div className="mb-3 flex flex-wrap gap-1.5">
-                        {date.vibes.slice(0, 3).map(v => {
-                            const vibe = VIBE_DEFINITIONS[v]
-                            return (
-                                <span
-                                    key={v}
-                                    className="inline-flex items-center gap-1 rounded-full bg-[#2a2a2a] px-2.5 py-1 text-xs text-gray-300"
-                                >
-                                    <span>{vibe?.emoji}</span>
-                                    <span>{vibe?.label}</span>
-                                </span>
-                            )
-                        })}
                     </div>
 
                     {/* Why It Fits */}
@@ -116,7 +103,7 @@ export function DateCard({ date, onSave, onUnsave, onComplete, onNotOurVibe }: D
                                 </>
                             ) : (
                                 <>
-                                    <Bookmark className="h-4 w-4" />
+                                    <Heart className="h-4 w-4" />
                                     Save
                                 </>
                             )}

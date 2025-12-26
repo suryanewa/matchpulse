@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Heart, Sparkles, Calendar, Gift, ArrowRight, MapPin, Clock, Wallet } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -90,11 +90,13 @@ function NeighborhoodStep({
     selected,
     onChange,
     onNext,
-    onBack
+    onBack,
+    currentStep
 }: {
     selected: string[]
     onChange: (neighborhoods: string[]) => void
     onNext: () => void
+    currentStep: number
     onBack: () => void
 }) {
     const toggle = (n: string) => {
@@ -109,7 +111,7 @@ function NeighborhoodStep({
             className="w-full max-w-2xl"
         >
             <div className="mb-8 text-center">
-                <MapPin className="mx-auto mb-4 h-10 w-10 text-pink-400" />
+                <MapPin className="mx-auto mb-4 h-10 w-10 text-[#FE3C72]" />
                 <h2 className="mb-2 text-2xl font-bold text-white">Where do you like to explore?</h2>
                 <p className="text-surface-400">Select your favorite neighborhoods (pick at least 2)</p>
             </div>
@@ -131,15 +133,26 @@ function NeighborhoodStep({
                 ))}
             </div>
 
-            <div className="flex justify-between">
-                <button onClick={onBack} className="text-gray-500 hover:text-white transition-colors">
+            <div className="grid grid-cols-3 items-center">
+                <button onClick={onBack} className="justify-self-start flex items-center gap-2 rounded-full bg-[#2a2a2a] px-6 py-2.5 font-semibold text-gray-300 transition-all hover:bg-[#333] hover:text-white">
                     Back
                 </button>
+                <div className="flex justify-center gap-1.5">
+                    {[1, 2, 3, 4].map((s) => (
+                        <div
+                            key={s}
+                            className={cn(
+                                'h-1.5 w-8 rounded-full transition-all',
+                                s <= currentStep ? 'bg-[#FE3C72]' : 'bg-[#2a2a2a]'
+                            )}
+                        />
+                    ))}
+                </div>
                 <button
                     onClick={onNext}
                     disabled={selected.length < 2}
                     className={cn(
-                        'flex items-center gap-2 rounded-full px-6 py-2.5 font-semibold transition-all',
+                        'justify-self-end flex items-center gap-2 rounded-full px-6 py-2.5 font-semibold transition-all',
                         selected.length >= 2
                             ? 'bg-gradient-to-r from-[#FE3C72] to-[#FF6B6B] text-white'
                             : 'bg-[#1a1a1a] text-gray-600 cursor-not-allowed'
@@ -156,12 +169,14 @@ function VibesStep({
     selected,
     onChange,
     onNext,
-    onBack
+    onBack,
+    currentStep
 }: {
     selected: VibeTag[]
     onChange: (vibes: VibeTag[]) => void
     onNext: () => void
     onBack: () => void
+    currentStep: number
 }) {
     const toggle = (v: VibeTag) => {
         onChange(selected.includes(v) ? selected.filter(x => x !== v) : [...selected, v])
@@ -198,13 +213,24 @@ function VibesStep({
                 ))}
             </div>
 
-            <div className="flex justify-between">
-                <button onClick={onBack} className="text-gray-500 hover:text-white transition-colors">Back</button>
+            <div className="grid grid-cols-3 items-center">
+                <button onClick={onBack} className="justify-self-start flex items-center gap-2 rounded-full bg-[#2a2a2a] px-6 py-2.5 font-semibold text-gray-300 transition-all hover:bg-[#333] hover:text-white">Back</button>
+                <div className="flex justify-center gap-1.5">
+                    {[1, 2, 3, 4].map((s) => (
+                        <div
+                            key={s}
+                            className={cn(
+                                'h-1.5 w-8 rounded-full transition-all',
+                                s <= currentStep ? 'bg-[#FE3C72]' : 'bg-[#2a2a2a]'
+                            )}
+                        />
+                    ))}
+                </div>
                 <button
                     onClick={onNext}
                     disabled={selected.length < 2}
                     className={cn(
-                        'flex items-center gap-2 rounded-full px-6 py-2.5 font-semibold transition-all',
+                        'justify-self-end flex items-center gap-2 rounded-full px-6 py-2.5 font-semibold transition-all',
                         selected.length >= 2
                             ? 'bg-gradient-to-r from-[#FE3C72] to-[#FF6B6B] text-white'
                             : 'bg-[#1a1a1a] text-gray-600 cursor-not-allowed'
@@ -221,12 +247,14 @@ function BudgetStep({
     selected,
     onChange,
     onNext,
-    onBack
+    onBack,
+    currentStep
 }: {
     selected: BudgetTier[]
     onChange: (budgets: BudgetTier[]) => void
     onNext: () => void
     onBack: () => void
+    currentStep: number
 }) {
     const toggle = (b: BudgetTier) => {
         onChange(selected.includes(b) ? selected.filter(x => x !== b) : [...selected, b])
@@ -266,13 +294,24 @@ function BudgetStep({
                 ))}
             </div>
 
-            <div className="flex justify-between">
-                <button onClick={onBack} className="text-gray-500 hover:text-white transition-colors">Back</button>
+            <div className="grid grid-cols-3 items-center">
+                <button onClick={onBack} className="justify-self-start flex items-center gap-2 rounded-full bg-[#2a2a2a] px-6 py-2.5 font-semibold text-gray-300 transition-all hover:bg-[#333] hover:text-white">Back</button>
+                <div className="flex justify-center gap-1.5">
+                    {[1, 2, 3, 4].map((s) => (
+                        <div
+                            key={s}
+                            className={cn(
+                                'h-1.5 w-8 rounded-full transition-all',
+                                s <= currentStep ? 'bg-[#FE3C72]' : 'bg-[#2a2a2a]'
+                            )}
+                        />
+                    ))}
+                </div>
                 <button
                     onClick={onNext}
                     disabled={selected.length === 0}
                     className={cn(
-                        'flex items-center gap-2 rounded-full px-6 py-2.5 font-semibold transition-all',
+                        'justify-self-end flex items-center gap-2 rounded-full px-6 py-2.5 font-semibold transition-all',
                         selected.length > 0
                             ? 'bg-gradient-to-r from-[#FE3C72] to-[#FF6B6B] text-white'
                             : 'bg-[#1a1a1a] text-gray-600 cursor-not-allowed'
@@ -289,12 +328,14 @@ function TimeStep({
     selected,
     onChange,
     onNext,
-    onBack
+    onBack,
+    currentStep
 }: {
     selected: TimeWindow[]
     onChange: (times: TimeWindow[]) => void
     onNext: () => void
     onBack: () => void
+    currentStep: number
 }) {
     const toggle = (t: TimeWindow) => {
         onChange(selected.includes(t) ? selected.filter(x => x !== t) : [...selected, t])
@@ -331,13 +372,24 @@ function TimeStep({
                 ))}
             </div>
 
-            <div className="flex justify-between">
-                <button onClick={onBack} className="text-gray-500 hover:text-white transition-colors">Back</button>
+            <div className="grid grid-cols-3 items-center">
+                <button onClick={onBack} className="justify-self-start flex items-center gap-2 rounded-full bg-[#2a2a2a] px-6 py-2.5 font-semibold text-gray-300 transition-all hover:bg-[#333] hover:text-white">Back</button>
+                <div className="flex justify-center gap-1.5">
+                    {[1, 2, 3, 4].map((s) => (
+                        <div
+                            key={s}
+                            className={cn(
+                                'h-1.5 w-8 rounded-full transition-all',
+                                s <= currentStep ? 'bg-[#FE3C72]' : 'bg-[#2a2a2a]'
+                            )}
+                        />
+                    ))}
+                </div>
                 <button
                     onClick={onNext}
                     disabled={selected.length === 0}
                     className={cn(
-                        'flex items-center gap-2 rounded-full px-6 py-2.5 font-semibold transition-all',
+                        'justify-self-end flex items-center gap-2 rounded-full px-6 py-2.5 font-semibold transition-all',
                         selected.length > 0
                             ? 'bg-gradient-to-r from-[#FE3C72] to-[#FF6B6B] text-white'
                             : 'bg-[#1a1a1a] text-gray-600 cursor-not-allowed'
@@ -359,18 +411,30 @@ function IdeasView({
     completedCount,
     isLoadingRecommendations,
     recommendationsError,
-    onRefresh
+    onRefresh,
+    onLoadMore
 }: {
     recommendations: DateSuggestion[]
     completedCount: number
     isLoadingRecommendations?: boolean
     recommendationsError?: string | null
     onRefresh?: () => void
+    onLoadMore?: () => void
 }) {
-    const { saveDate, unsaveDate, logDate, markNotOurVibe } = useCupid()
+    const { saveDate, unsaveDate, logDate, markNotOurVibe, dismissDate } = useCupid()
+    const [displayCount, setDisplayCount] = useState(6)
+    const [filter, setFilter] = useState<'all' | 'saved'>('all')
+
+    // Filter recommendations based on current filter
+    const filteredRecommendations = filter === 'saved'
+        ? recommendations.filter(r => r.isSaved)
+        : recommendations
+
+    const displayedRecommendations = filteredRecommendations.slice(0, displayCount)
+    const hasMore = displayCount < filteredRecommendations.length
 
     return (
-        <div className="min-h-screen bg-black px-4 py-6 sm:px-6">
+        <div className="px-4 py-6 sm:px-6">
             <div className="mx-auto max-w-5xl">
                 {/* Header - Tinder Style */}
                 <div className="mb-6 flex items-center justify-between">
@@ -398,8 +462,35 @@ function IdeasView({
                     </div>
                 </div>
 
+                {/* Filter Tabs */}
+                <div className="mb-6 flex gap-2">
+                    <button
+                        onClick={() => setFilter('all')}
+                        className={cn(
+                            'rounded-full px-4 py-2 text-sm font-semibold transition-all',
+                            filter === 'all'
+                                ? 'bg-[#FE3C72] text-white'
+                                : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#222]'
+                        )}
+                    >
+                        All Ideas
+                    </button>
+                    <button
+                        onClick={() => setFilter('saved')}
+                        className={cn(
+                            'flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all',
+                            filter === 'saved'
+                                ? 'bg-[#FE3C72] text-white'
+                                : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#222]'
+                        )}
+                    >
+                        <Heart className="h-4 w-4" />
+                        Saved
+                    </button>
+                </div>
+
                 {/* Progress Banner */}
-                {completedCount > 0 && completedCount < 10 && (
+                {completedCount > 0 && completedCount < 5 && (
                     <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -407,10 +498,10 @@ function IdeasView({
                     >
                         <div className="flex items-center justify-between">
                             <span className="text-sm text-gray-400">
-                                <span className="font-semibold text-[#FE3C72]">{10 - completedCount}</span> more dates until Wrapped unlocks
+                                <span className="font-semibold text-[#FE3C72]">{5 - completedCount}</span> more dates until Wrapped unlocks
                             </span>
                             <div className="flex items-center gap-1">
-                                {[...Array(10)].map((_, i) => (
+                                {[...Array(5)].map((_, i) => (
                                     <div
                                         key={i}
                                         className={cn(
@@ -424,7 +515,7 @@ function IdeasView({
                     </motion.div>
                 )}
 
-                {completedCount >= 10 && (
+                {completedCount >= 5 && (
                     <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -436,8 +527,8 @@ function IdeasView({
                     </motion.div>
                 )}
 
-                {/* Loading State - Tinder Style */}
-                {isLoadingRecommendations && (
+                {/* Loading State - Only show when no cards exist (initial load) */}
+                {isLoadingRecommendations && recommendations.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-20">
                         <motion.div
                             animate={{ rotate: 360 }}
@@ -465,14 +556,23 @@ function IdeasView({
                     </div>
                 )}
 
-                {/* Cards Grid */}
-                {!isLoadingRecommendations && (
+                {/* Cards Grid - Always show when cards exist */}
+                {(recommendations.length > 0 || !isLoadingRecommendations) && (
                     <>
-                        {recommendations.length === 0 ? (
+                        {filteredRecommendations.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-20">
-                                <div className="mb-4 text-5xl">💕</div>
-                                <p className="mb-4 text-gray-500">No recommendations yet</p>
-                                {onRefresh && (
+                                <div className="mb-4 text-5xl">{filter === 'saved' ? '💕' : '💕'}</div>
+                                <p className="mb-4 text-gray-500">
+                                    {filter === 'saved' ? 'No saved dates yet' : 'No recommendations yet'}
+                                </p>
+                                {filter === 'saved' ? (
+                                    <button
+                                        onClick={() => setFilter('all')}
+                                        className="rounded-full bg-gradient-to-r from-[#FE3C72] to-[#FF6B6B] px-6 py-2.5 text-sm font-semibold text-white"
+                                    >
+                                        Browse All Ideas
+                                    </button>
+                                ) : onRefresh && (
                                     <button
                                         onClick={onRefresh}
                                         className="rounded-full bg-gradient-to-r from-[#FE3C72] to-[#FF6B6B] px-6 py-2.5 text-sm font-semibold text-white"
@@ -482,18 +582,40 @@ function IdeasView({
                                 )}
                             </div>
                         ) : (
-                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                                {recommendations.slice(0, 15).map((date, i) => (
-                                    <DateCard
-                                        key={date.id}
-                                        date={date}
-                                        onSave={saveDate}
-                                        onUnsave={unsaveDate}
-                                        onComplete={logDate}
-                                        onNotOurVibe={markNotOurVibe}
-                                    />
-                                ))}
-                            </div>
+                            <>
+                                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                    <AnimatePresence mode="popLayout">
+                                        {displayedRecommendations.map((date) => (
+                                            <DateCard
+                                                key={date.id}
+                                                date={date}
+                                                onSave={saveDate}
+                                                onUnsave={unsaveDate}
+                                                onComplete={logDate}
+                                                onNotOurVibe={markNotOurVibe}
+                                                onDismiss={dismissDate}
+                                            />
+                                        ))}
+                                    </AnimatePresence>
+                                </div>
+
+                                {/* Show More Button */}
+                                <div className="mt-8 flex justify-center">
+                                    <button
+                                        onClick={() => {
+                                            if (hasMore) {
+                                                setDisplayCount(prev => prev + 6)
+                                            } else if (onLoadMore) {
+                                                onLoadMore()
+                                            }
+                                        }}
+                                        disabled={isLoadingRecommendations}
+                                        className="flex items-center gap-2 rounded-full bg-[#1a1a1a] px-6 py-3 text-sm font-semibold text-gray-300 transition-all hover:bg-[#222] disabled:opacity-50"
+                                    >
+                                        {isLoadingRecommendations ? 'Loading...' : 'Show More'}
+                                    </button>
+                                </div>
+                            </>
                         )}
                     </>
                 )}
@@ -513,6 +635,7 @@ export default function CupidPage() {
         completeOnboarding,
         getRecommendations,
         fetchRecommendations,
+        recommendations: cachedRecommendations,
         isLoading,
         isLoadingRecommendations,
         recommendationsError
@@ -526,15 +649,13 @@ export default function CupidPage() {
         cuisines: ['coffee', 'dessert'],
         timeWindows: [],
     })
-    const [hasFetched, setHasFetched] = useState(false)
 
-    // Fetch recommendations when onboarded and preferences are set
+    // Only fetch recommendations if none are cached
     useEffect(() => {
-        if (state.isOnboarded && state.userPreferences && !hasFetched && !isLoading) {
+        if (state.isOnboarded && state.userPreferences && cachedRecommendations.length === 0 && !isLoading && !isLoadingRecommendations) {
             fetchRecommendations()
-            setHasFetched(true)
         }
-    }, [state.isOnboarded, state.userPreferences, hasFetched, isLoading, fetchRecommendations])
+    }, [state.isOnboarded, state.userPreferences, cachedRecommendations.length, isLoading, isLoadingRecommendations, fetchRecommendations])
 
     // If already onboarded, show the ideas page
     if (state.isOnboarded && !isLoading) {
@@ -546,6 +667,7 @@ export default function CupidPage() {
                 isLoadingRecommendations={isLoadingRecommendations}
                 recommendationsError={recommendationsError}
                 onRefresh={() => fetchRecommendations()}
+                onLoadMore={() => fetchRecommendations(true)}
             />
         )
     }
@@ -560,21 +682,6 @@ export default function CupidPage() {
 
     return (
         <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
-            {/* Progress */}
-            {step > 0 && (
-                <div className="mb-8 flex gap-2">
-                    {[1, 2, 3, 4].map((s) => (
-                        <div
-                            key={s}
-                            className={cn(
-                                'h-2 w-12 rounded-full transition-all',
-                                s <= step ? 'bg-pink-500' : 'bg-surface-700'
-                            )}
-                        />
-                    ))}
-                </div>
-            )}
-
             {/* Steps */}
             {step === 0 && <WelcomeStep onNext={() => setStep(1)} />}
             {step === 1 && (
@@ -583,6 +690,7 @@ export default function CupidPage() {
                     onChange={(n) => setPrefs({ ...prefs, neighborhoods: n })}
                     onNext={() => setStep(2)}
                     onBack={() => setStep(0)}
+                    currentStep={step}
                 />
             )}
             {step === 2 && (
@@ -591,6 +699,7 @@ export default function CupidPage() {
                     onChange={(v) => setPrefs({ ...prefs, vibes: v })}
                     onNext={() => setStep(3)}
                     onBack={() => setStep(1)}
+                    currentStep={step}
                 />
             )}
             {step === 3 && (
@@ -599,6 +708,7 @@ export default function CupidPage() {
                     onChange={(b) => setPrefs({ ...prefs, budgetTiers: b })}
                     onNext={() => setStep(4)}
                     onBack={() => setStep(2)}
+                    currentStep={step}
                 />
             )}
             {step === 4 && (
@@ -607,6 +717,7 @@ export default function CupidPage() {
                     onChange={(t) => setPrefs({ ...prefs, timeWindows: t })}
                     onNext={finishSetup}
                     onBack={() => setStep(3)}
+                    currentStep={step}
                 />
             )}
         </div>

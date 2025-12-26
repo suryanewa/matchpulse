@@ -188,6 +188,7 @@ export interface CupidState {
     savedDates: string[];
     completedDates: DateLog[];
     notOurVibeDates: string[];
+    dismissedDates: string[];
     wrappedData: WrappedData | null;
     wrappedUnlocked: boolean;
 }

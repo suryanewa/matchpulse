@@ -128,8 +128,8 @@ export const personas: Persona[] = [
         tagline: 'Life\'s too short for boring dates',
         description: 'The Chaos Creative thrives on spontaneity and novelty. They suggest unconventional dates, send voice notes at 2am, and believe that the best connections happen when you break the rules.',
         emoji: '🌪️',
-        color: '#ec4899',
-        gradient: 'from-pink-500 to-rose-600',
+        color: '#3b82f6',
+        gradient: 'from-blue-500 to-indigo-600',
         motivations: [
             'Excitement and novelty',
             'Authentic, unfiltered connections',

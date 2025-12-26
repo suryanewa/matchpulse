@@ -3,7 +3,7 @@
 import { BehaviorTrend } from '@/types'
 import { Sparkline } from '@/components/ui/Sparkline'
 import { formatNumber, formatGrowth, cn } from '@/lib/utils'
-import { TrendingUp, TrendingDown, Bookmark, Heart } from 'lucide-react'
+import { TrendingUp, TrendingDown, Heart } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useDashboard } from '@/context/DashboardContext'
 
@@ -25,9 +25,9 @@ export function BehaviorCard({ trend, onClick }: BehaviorCardProps) {
     return (
         <motion.div
             onClick={onClick}
-            whileHover={{ y: -4 }}
+            whileHover={{ y: -4, transition: { duration: 0.15, ease: 'easeOut' } }}
             whileTap={{ scale: 0.98 }}
-            className="group relative h-full cursor-pointer overflow-hidden rounded-3xl bg-[#1a1a1a] p-5 shadow-lg transition-all hover:bg-[#222] hover:shadow-xl hover:shadow-black/50 flex flex-col justify-between"
+            className="group relative h-full cursor-pointer overflow-hidden rounded-3xl bg-[#1a1a1a] p-5 shadow-lg transition-[background-color,box-shadow] duration-150 ease-out hover:bg-[#222] hover:shadow-xl hover:shadow-black/50 flex flex-col justify-between"
         >
             <div>
                 {/* Header Row */}
@@ -52,14 +52,14 @@ export function BehaviorCard({ trend, onClick }: BehaviorCardProps) {
                         className={cn(
                             'flex h-10 w-10 items-center justify-center rounded-full transition-all',
                             isSaved
-                                ? 'bg-emerald-500/20 text-emerald-500'
+                                ? 'bg-[#FE3C72]/20 text-[#FE3C72]'
                                 : 'bg-transparent text-gray-600 hover:bg-[#2a2a2a] hover:text-gray-400'
                         )}
                     >
                         {isSaved ? (
                             <Heart className="h-5 w-5 fill-current" />
                         ) : (
-                            <Bookmark className="h-5 w-5" />
+                            <Heart className="h-5 w-5" />
                         )}
                     </button>
                 </div>

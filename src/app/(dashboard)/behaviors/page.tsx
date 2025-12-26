@@ -7,7 +7,7 @@ import { behaviorTrends } from '@/data/mock-data'
 import { BehaviorTrend } from '@/types'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
-import { TrendingUp, Filter, Search, Bookmark, ChevronDown } from 'lucide-react'
+import { TrendingUp, Filter, Search, Heart, ChevronDown } from 'lucide-react'
 import { useDashboard } from '@/context/DashboardContext'
 import { useMemo, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
@@ -158,6 +158,18 @@ function BehaviorsContent() {
                     />
                 </div>
                 <div className="flex items-center gap-2">
+                    <div className="relative">
+                        <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value as 'growth' | 'mentions' | 'recent')}
+                            className="appearance-none bg-[#1a1a1a] border-0 rounded-xl pl-4 pr-10 py-2.5 text-sm text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FE3C72]/50 cursor-pointer"
+                        >
+                            <option value="growth">Fastest Rising</option>
+                            <option value="mentions">Most Mentioned</option>
+                            <option value="recent">Recently Updated</option>
+                        </select>
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                    </div>
                     <button
                         onClick={() => setShowSavedOnly(!showSavedOnly)}
                         className={cn(
@@ -167,21 +179,9 @@ function BehaviorsContent() {
                                 : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#2a2a2a] hover:text-white'
                         )}
                     >
-                        <Bookmark className={cn('h-4 w-4', showSavedOnly && 'fill-current')} />
+                        <Heart className={cn('h-4 w-4', showSavedOnly && 'fill-current')} />
                         Saved Only
                     </button>
-                    <div className="relative">
-                        <select
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value as 'growth' | 'mentions' | 'recent')}
-                            className="appearance-none bg-[#1a1a1a] border-0 rounded-xl pl-4 pr-10 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#FE3C72]/50 cursor-pointer"
-                        >
-                            <option value="growth">Fastest Rising</option>
-                            <option value="mentions">Most Mentioned</option>
-                            <option value="recent">Recently Updated</option>
-                        </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-                    </div>
                 </div>
             </div>
 

@@ -29,9 +29,9 @@ export function PersonaCard({ persona }: PersonaCardProps) {
     return (
         <Link href={`/personas/${persona.id}`}>
             <motion.div
-                whileHover={{ y: -4 }}
+                whileHover={{ y: -4, transition: { duration: 0.15, ease: 'easeOut' } }}
                 whileTap={{ scale: 0.98 }}
-                className="group relative h-full cursor-pointer overflow-hidden rounded-3xl bg-[#1a1a1a] p-5 shadow-lg transition-all hover:bg-[#222] hover:shadow-xl hover:shadow-black/50 flex flex-col"
+                className="group relative h-full cursor-pointer overflow-hidden rounded-3xl bg-[#1a1a1a] p-5 shadow-lg transition-[background-color,box-shadow] duration-150 ease-out hover:bg-[#222] hover:shadow-xl hover:shadow-black/50 flex flex-col"
             >
                 {/* Header Row */}
                 <div className="mb-4 flex items-start justify-between">
@@ -50,7 +50,7 @@ export function PersonaCard({ persona }: PersonaCardProps) {
 
                 {/* Title & Tagline */}
                 <div className="mb-4">
-                    <h3 className="mb-1 text-xl font-bold text-white group-hover:text-[#FE3C72] transition-colors">
+                    <h3 className="mb-1 text-xl font-bold text-white">
                         {persona.name}
                     </h3>
                     <p className="text-sm font-medium text-gray-500">

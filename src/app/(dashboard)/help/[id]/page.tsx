@@ -18,7 +18,7 @@ export default function GuideDetailPage() {
                 <h1 className="text-2xl font-bold text-white mb-4">Guide not found</h1>
                 <button
                     onClick={() => router.push('/help')}
-                    className="text-pulse-400 hover:text-pulse-300 flex items-center gap-2"
+                    className="text-[#FE3C72] hover:opacity-80 flex items-center gap-2 font-medium"
                 >
                     <ChevronLeft className="h-4 w-4" />
                     Back to Help Center
@@ -29,44 +29,43 @@ export default function GuideDetailPage() {
 
     return (
         <div className="max-w-4xl mx-auto space-y-8 pb-20">
-            {/* Header / Breadcrumb */}
+            {/* Header / Breadcrumb - Tinder style */}
             <nav className="flex items-center justify-between">
                 <Link
                     href="/help"
-                    className="group flex items-center gap-2 text-sm font-medium text-surface-400 transition-colors hover:text-white"
+                    className="group flex items-center gap-3 text-sm font-medium text-gray-400 transition-colors hover:text-white"
                 >
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-900 border border-surface-800 transition-colors group-hover:border-surface-600">
-                        <ChevronLeft className="h-4 w-4" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1a1a1a] transition-colors duration-150 ease-out group-hover:bg-[#222]">
+                        <ChevronLeft className="h-5 w-5" />
                     </div>
                     Back to Help Center
                 </Link>
-                <div className="flex items-center gap-2 text-xs font-medium text-surface-500 bg-surface-900/50 px-3 py-1.5 rounded-full border border-surface-800">
-                    <Clock className="h-3 w-3" />
+                <div className="flex items-center gap-2 text-xs font-medium text-gray-500 bg-[#1a1a1a] px-4 py-2 rounded-full">
+                    <Clock className="h-3.5 w-3.5" />
                     {guide.duration} read
                 </div>
             </nav>
 
-            {/* Hero Section */}
-            <div className="relative overflow-hidden rounded-2xl border border-surface-800 bg-surface-900/50 p-8 md:p-12 backdrop-blur-md">
-                <div className="absolute inset-0 -z-10 bg-gradient-to-br from-pulse-500/5 to-accent-500/5" />
+            {/* Hero Section - Tinder style */}
+            <div className="relative overflow-hidden rounded-3xl bg-[#1a1a1a] p-8 md:p-12">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="relative z-10 space-y-4"
                 >
-                    <div className={cn("inline-flex h-12 w-12 items-center justify-center rounded-xl bg-surface-950/50 border border-surface-800", guide.color)}>
-                        <guide.icon className="h-6 w-6" />
+                    <div className={cn("inline-flex h-14 w-14 items-center justify-center rounded-2xl", guide.color)}>
+                        <guide.icon className="h-7 w-7" />
                     </div>
                     <h1 className="text-3xl md:text-4xl font-bold text-white">{guide.title}</h1>
-                    <p className="text-lg text-surface-400 max-w-2xl">
+                    <p className="text-lg text-gray-500 max-w-2xl">
                         {guide.description}
                     </p>
                 </motion.div>
             </div>
 
-            {/* Content Sections */}
-            <div className="grid grid-cols-1 gap-12 lg:grid-cols-4">
-                <div className="lg:col-span-3 space-y-12">
+            {/* Content Sections - Tinder style */}
+            <div className="grid grid-cols-1 gap-10 lg:grid-cols-4">
+                <div className="lg:col-span-3 space-y-10">
                     {guide.content.map((item, i) => (
                         <motion.section
                             key={i}
@@ -76,26 +75,26 @@ export default function GuideDetailPage() {
                             className="space-y-4"
                         >
                             <h2 className="text-xl font-bold text-white flex items-center gap-3">
-                                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-pulse-500/10 text-[10px] font-bold text-pulse-400 border border-pulse-500/20">
+                                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FE3C72] text-xs font-bold text-white">
                                     0{i + 1}
                                 </span>
                                 {item.section}
                             </h2>
-                            <p className="text-surface-400 leading-relaxed text-lg">
+                            <p className="text-gray-400 leading-relaxed text-lg pl-11">
                                 {item.text}
                             </p>
                         </motion.section>
                     ))}
 
-                    {/* Footer Navigation */}
-                    <div className="pt-12 border-t border-surface-800 flex flex-col md:flex-row gap-6 items-center justify-between text-center md:text-left">
+                    {/* Footer Navigation - Tinder style */}
+                    <div className="pt-10 border-t border-[#222] flex flex-col md:flex-row gap-6 items-center justify-between text-center md:text-left">
                         <div className="space-y-1">
-                            <h4 className="text-white font-semibold">Found this helpful?</h4>
-                            <p className="text-sm text-surface-500">Explore more guides to unlock MatchPulse's full potential.</p>
+                            <h4 className="text-white font-bold">Found this helpful?</h4>
+                            <p className="text-sm text-gray-500">Explore more guides to unlock MatchPulse's full potential.</p>
                         </div>
                         <Link
                             href="/help"
-                            className="flex items-center gap-2 rounded-lg bg-pulse-500 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-pulse-600 active:scale-95 shadow-lg shadow-pulse-500/20"
+                            className="flex items-center gap-2 rounded-full bg-[#FE3C72] px-6 py-3 text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95 shadow-lg shadow-[#FE3C72]/20"
                         >
                             Explore All Guides
                             <ArrowRight className="h-4 w-4" />
@@ -103,11 +102,11 @@ export default function GuideDetailPage() {
                     </div>
                 </div>
 
-                {/* Sticky Sidebar Right */}
+                {/* Sticky Sidebar Right - Tinder style */}
                 <aside className="hidden lg:block space-y-6">
-                    <div className="sticky top-6 p-6 rounded-xl border border-surface-800 bg-surface-900/30">
-                        <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-6 flex items-center gap-2">
-                            <BookOpen className="h-4 w-4 text-pulse-400" />
+                    <div className="sticky top-6 p-5 rounded-2xl bg-[#1a1a1a]">
+                        <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-5 flex items-center gap-2">
+                            <BookOpen className="h-4 w-4 text-[#FE3C72]" />
                             Related Guides
                         </h3>
                         <div className="space-y-4">
@@ -119,8 +118,8 @@ export default function GuideDetailPage() {
                                         href={`/help/${g.id}`}
                                         className="block group"
                                     >
-                                        <p className="text-sm font-medium text-surface-400 group-hover:text-pulse-400 transition-colors mb-1">{g.title}</p>
-                                        <p className="text-xs text-surface-600">{g.duration} read</p>
+                                        <p className="text-sm font-medium text-gray-400 group-hover:text-[#FE3C72] transition-colors mb-1">{g.title}</p>
+                                        <p className="text-xs text-gray-600">{g.duration} read</p>
                                     </Link>
                                 ))
                             }

@@ -6,15 +6,10 @@ import {
     Search,
     BookOpen,
     MessageCircle,
-    Zap,
-    Shield,
-    Layers,
     ChevronDown,
     ExternalLink,
     HelpCircle,
-    PlayCircle,
     ArrowRight,
-    Users
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { helpGuides } from '@/data/help-guides'
@@ -66,28 +61,29 @@ export default function HelpPage() {
     const hasResults = filteredFaqs.length > 0 || filteredGuides.length > 0
 
     return (
-        <div className="space-y-12 pb-12">
-            {/* Hero Section */}
-            <div className="relative overflow-hidden rounded-2xl border border-surface-800 bg-surface-900/50 p-12 text-center backdrop-blur-md">
-                <div className="absolute inset-0 -z-10 bg-gradient-to-br from-pulse-500/5 to-accent-500/5" />
+        <div className="space-y-10 pb-12">
+            {/* Hero Section - Tinder style */}
+            <div className="relative overflow-hidden rounded-3xl bg-[#1a1a1a] p-10 text-center">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="mx-auto max-w-2xl"
                 >
-                    <HelpCircle className="mx-auto h-12 w-12 text-pulse-500 mb-6" />
-                    <h1 className="text-4xl font-bold text-white mb-4">How can we help?</h1>
-                    <p className="text-surface-400 mb-8">
+                    <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#FE3C72] to-[#FF6B6B] shadow-lg shadow-[#FE3C72]/20">
+                        <HelpCircle className="h-8 w-8 text-white" />
+                    </div>
+                    <h1 className="text-3xl font-bold text-white mb-3">How can we help?</h1>
+                    <p className="text-gray-500 mb-8">
                         Search our knowledge base or browse frequently asked questions below.
                     </p>
                     <div className="relative mx-auto max-w-md">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-surface-500" />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
                         <input
                             type="text"
                             placeholder="Search for articles, guides..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full rounded-full border border-surface-700 bg-surface-950/50 py-3 pl-12 pr-4 text-white placeholder-surface-500 backdrop-blur-sm transition-all focus:border-pulse-500 focus:outline-none focus:ring-1 focus:ring-pulse-500"
+                            className="w-full rounded-2xl border-0 bg-[#222] py-4 pl-12 pr-4 text-white placeholder-gray-600 transition-all focus:outline-none focus:ring-2 focus:ring-[#FE3C72]/50"
                         />
                     </div>
                 </motion.div>
@@ -96,38 +92,45 @@ export default function HelpPage() {
             {/* Results Grid */}
             {!hasResults ? (
                 <div className="text-center py-12">
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-surface-900 border border-surface-800 mb-4">
-                        <Search className="h-8 w-8 text-surface-500" />
+                    <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#1a1a1a] mb-4">
+                        <Search className="h-10 w-10 text-gray-600" />
                     </div>
-                    <h3 className="text-xl font-medium text-white mb-2">No results found</h3>
-                    <p className="text-surface-400 max-w-md mx-auto">
+                    <h3 className="text-xl font-bold text-white mb-2">No results found</h3>
+                    <p className="text-gray-500 max-w-md mx-auto">
                         We couldn't find any articles or FAQs matching "{searchQuery}". Try using different keywords or browse the categories below.
                     </p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
-                    {/* FAQ Section */}
+                <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
+                    {/* FAQ Section - Tinder style */}
                     {filteredFaqs.length > 0 && (
-                        <div className={cn("space-y-6", filteredGuides.length === 0 ? "lg:col-span-3" : "lg:col-span-2")}>
-                            <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                                <MessageCircle className="h-5 w-5 text-pulse-400" />
+                        <div className={cn("space-y-5", filteredGuides.length === 0 ? "lg:col-span-3" : "lg:col-span-2")}>
+                            <h2 className="text-xl font-bold text-white flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#FE3C72] text-white">
+                                    <MessageCircle className="h-5 w-5" />
+                                </div>
                                 Frequently Asked Questions
                             </h2>
                             <div className="space-y-3">
                                 {filteredFaqs.map((faq, i) => (
                                     <div
                                         key={i}
-                                        className="overflow-hidden rounded-xl border border-surface-800 bg-surface-900/30 transition-all hover:bg-surface-800/30"
+                                        className="overflow-hidden rounded-2xl bg-[#1a1a1a] transition-all"
                                     >
                                         <button
                                             onClick={() => setOpenFaq(openFaq === i ? null : i)}
                                             className="flex w-full items-center justify-between p-5 text-left"
                                         >
-                                            <span className="font-medium text-surface-100">{faq.question}</span>
-                                            <ChevronDown className={cn(
-                                                "h-5 w-5 text-surface-500 transition-transform",
-                                                openFaq === i && "rotate-180"
-                                            )} />
+                                            <span className="font-medium text-white">{faq.question}</span>
+                                            <div className={cn(
+                                                "flex h-8 w-8 items-center justify-center rounded-full bg-[#222] transition-all",
+                                                openFaq === i && "bg-[#FE3C72]"
+                                            )}>
+                                                <ChevronDown className={cn(
+                                                    "h-4 w-4 text-gray-400 transition-transform",
+                                                    openFaq === i && "rotate-180 text-white"
+                                                )} />
+                                            </div>
                                         </button>
                                         <AnimatePresence>
                                             {openFaq === i && (
@@ -137,7 +140,7 @@ export default function HelpPage() {
                                                     exit={{ height: 0, opacity: 0 }}
                                                     className="overflow-hidden"
                                                 >
-                                                    <div className="p-5 pt-0 text-sm leading-relaxed text-surface-400 border-t border-surface-800/50">
+                                                    <div className="px-5 pb-5 text-sm leading-relaxed text-gray-400">
                                                         {faq.answer}
                                                     </div>
                                                 </motion.div>
@@ -149,13 +152,15 @@ export default function HelpPage() {
                         </div>
                     )}
 
-                    {/* Getting Started Guides */}
-                    <div className={cn("space-y-6", filteredFaqs.length === 0 && "lg:col-span-3", filteredGuides.length === 0 && "hidden")}>
-                        <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                            <BookOpen className="h-5 w-5 text-accent-400" />
+                    {/* Getting Started Guides - Tinder style */}
+                    <div className={cn("space-y-5", filteredFaqs.length === 0 && "lg:col-span-3", filteredGuides.length === 0 && "hidden")}>
+                        <h2 className="text-xl font-bold text-white flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 text-white">
+                                <BookOpen className="h-5 w-5" />
+                            </div>
                             Featured Guides
                         </h2>
-                        <div className={cn("grid gap-4", filteredFaqs.length === 0 ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1")}>
+                        <div className={cn("grid gap-3", filteredFaqs.length === 0 ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1")}>
                             {filteredGuides.map((guide, i) => (
                                 <Link
                                     key={guide.id}
@@ -166,33 +171,33 @@ export default function HelpPage() {
                                         initial={{ opacity: 0, x: 20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: i * 0.1 }}
-                                        className="group relative rounded-xl border border-surface-800 bg-surface-900/30 p-4 transition-all hover:border-surface-600 hover:bg-surface-800/50"
+                                        className="group relative rounded-2xl bg-[#1a1a1a] p-4 transition-[background-color,transform] duration-150 ease-out hover:bg-[#222] hover:-translate-y-1"
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg bg-surface-800", guide.color)}>
+                                            <div className={cn("flex h-12 w-12 items-center justify-center rounded-xl", guide.color)}>
                                                 <guide.icon className="h-5 w-5" />
                                             </div>
                                             <div className="flex-1">
-                                                <h3 className="font-medium text-white group-hover:text-pulse-400 transition-colors">{guide.title}</h3>
-                                                <p className="text-xs text-surface-500">{guide.duration} read</p>
+                                                <h3 className="font-medium text-white group-hover:text-[#FE3C72] transition-colors">{guide.title}</h3>
+                                                <p className="text-xs text-gray-500">{guide.duration} read</p>
                                             </div>
-                                            <ArrowRight className="h-4 w-4 text-surface-600 group-hover:text-white transition-all transform group-hover:translate-x-1" />
+                                            <ArrowRight className="h-4 w-4 text-gray-600 transition-all transform group-hover:translate-x-1 group-hover:text-[#FE3C72]" />
                                         </div>
                                     </motion.div>
                                 </Link>
                             ))}
                         </div>
 
-                        {/* Support Card - Only show in sidebar if we have guides, otherwise maybe move it? Or keep it here. */}
+                        {/* Support Card - Tinder style */}
                         {filteredFaqs.length > 0 && (
-                            <div className="mt-8 rounded-xl bg-gradient-to-br from-pulse-500/10 to-accent-500/10 border border-pulse-500/20 p-6">
+                            <div className="mt-6 rounded-2xl bg-gradient-to-br from-[#FE3C72]/10 to-[#FF6B6B]/5 p-6">
                                 <h3 className="mb-2 font-bold text-white">Still need help?</h3>
-                                <p className="mb-6 text-sm text-surface-400">
+                                <p className="mb-5 text-sm text-gray-500">
                                     Our team is available 24/7 for technical support and data inquiries.
                                 </p>
                                 <a
                                     href="mailto:newa@nyu.edu"
-                                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-pulse-500 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-pulse-600 active:scale-95 shadow-lg shadow-pulse-500/20"
+                                    className="flex w-full items-center justify-center gap-2 rounded-full bg-[#FE3C72] px-4 py-3 text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95 shadow-lg shadow-[#FE3C72]/20"
                                 >
                                     Contact Support
                                     <ExternalLink className="h-4 w-4" />
