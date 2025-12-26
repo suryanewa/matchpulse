@@ -60,51 +60,77 @@ export function Header() {
 
     return (
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-surface-800 bg-surface-950/80 px-6 backdrop-blur-md">
-            {/* Search */}
+            {/* Search - Tinder Style */}
             <div className="relative w-96" ref={searchRef}>
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-surface-500" />
-                <input
-                    type="text"
-                    placeholder="Search trends, personas, opportunities..."
-                    value={searchQuery}
-                    onChange={(e) => {
-                        setSearchQuery(e.target.value)
-                        setShowSearch(true)
-                    }}
-                    onFocus={() => setShowSearch(true)}
-                    className="h-10 w-full rounded-lg border border-surface-700 bg-surface-900 pl-10 pr-4 text-sm text-white placeholder-surface-500 transition-colors focus:border-pulse-500 focus:outline-none focus:ring-1 focus:ring-pulse-500"
-                />
+                <div className={cn(
+                    "flex items-center gap-3 rounded-full border px-4 py-2.5 transition-all duration-200",
+                    showSearch && searchQuery.trim()
+                        ? "border-[#FE3C72] bg-[#1a1a1a] shadow-lg shadow-[#FE3C72]/10"
+                        : "border-[#333] bg-[#1a1a1a] hover:border-[#444]"
+                )}>
+                    <Search className={cn(
+                        "h-4 w-4 transition-colors",
+                        showSearch && searchQuery.trim() ? "text-[#FE3C72]" : "text-gray-500"
+                    )} />
+                    <input
+                        type="text"
+                        placeholder="Search trends, personas, opportunities..."
+                        value={searchQuery}
+                        onChange={(e) => {
+                            setSearchQuery(e.target.value)
+                            setShowSearch(true)
+                        }}
+                        onFocus={() => setShowSearch(true)}
+                        className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 focus:outline-none"
+                    />
+                    {searchQuery && (
+                        <button
+                            onClick={() => {
+                                setSearchQuery('')
+                                setShowSearch(false)
+                            }}
+                            className="flex h-5 w-5 items-center justify-center rounded-full bg-[#333] text-gray-400 hover:bg-[#444] hover:text-white transition-colors"
+                        >
+                            <X className="h-3 w-3" />
+                        </button>
+                    )}
+                </div>
 
                 <AnimatePresence>
                     {showSearch && searchQuery.trim() && (
                         <motion.div
-                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                            initial={{ opacity: 0, y: 8, scale: 0.98 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                            transition={{ duration: 0.2 }}
-                            className="absolute left-0 mt-2 w-full overflow-hidden rounded-xl border border-surface-800 bg-surface-900/95 shadow-2xl backdrop-blur-xl"
+                            exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                            transition={{ duration: 0.15, ease: 'easeOut' }}
+                            className="absolute left-0 mt-3 w-full overflow-hidden rounded-2xl border border-[#222] bg-[#1a1a1a] shadow-2xl shadow-black/50"
                         >
                             {!hasResults ? (
-                                <div className="p-4 text-center text-sm text-surface-500">
-                                    No results found for "{searchQuery}"
+                                <div className="p-6 text-center">
+                                    <div className="text-2xl mb-2">🔍</div>
+                                    <p className="text-sm text-gray-500">
+                                        No results found for "{searchQuery}"
+                                    </p>
                                 </div>
                             ) : (
-                                <div className="max-h-[calc(100vh-200px)] overflow-y-auto py-2">
+                                <div className="max-h-[400px] overflow-y-auto py-2">
                                     {/* Trends */}
                                     {searchResults.trends.length > 0 && (
-                                        <div className="mb-2">
-                                            <div className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-surface-500">
-                                                <Zap className="h-3 w-3" />
-                                                Trends
+                                        <div className="mb-1">
+                                            <div className="flex items-center gap-2 px-4 py-2">
+                                                <div className="flex h-5 w-5 items-center justify-center rounded-md bg-[#FE3C72]/10">
+                                                    <Zap className="h-3 w-3 text-[#FE3C72]" />
+                                                </div>
+                                                <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Trends</span>
                                             </div>
                                             {searchResults.trends.map(trend => (
                                                 <button
                                                     key={trend.id}
                                                     onClick={() => handleSearchClick(`/behaviors?trendId=${trend.id}`)}
-                                                    className="flex w-full items-center justify-between px-3 py-2 transition-colors hover:bg-surface-800"
+                                                    className="flex w-full items-center justify-between px-4 py-2.5 transition-all hover:bg-[#222]"
                                                 >
-                                                    <span className="text-sm text-surface-200">{trend.title}</span>
-                                                    <ArrowRight className="h-3 w-3 text-surface-500" />
+                                                    <span className="text-sm text-gray-200">{trend.title}</span>
+                                                    <ArrowRight className="h-3.5 w-3.5 text-gray-600" />
                                                 </button>
                                             ))}
                                         </div>
@@ -112,22 +138,24 @@ export function Header() {
 
                                     {/* Personas */}
                                     {searchResults.personas.length > 0 && (
-                                        <div className="mb-2 border-t border-surface-800 pt-2">
-                                            <div className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-surface-500">
-                                                <Users className="h-3 w-3" />
-                                                Personas
+                                        <div className="mb-1 border-t border-[#222] pt-1">
+                                            <div className="flex items-center gap-2 px-4 py-2">
+                                                <div className="flex h-5 w-5 items-center justify-center rounded-md bg-purple-500/10">
+                                                    <Users className="h-3 w-3 text-purple-400" />
+                                                </div>
+                                                <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Personas</span>
                                             </div>
                                             {searchResults.personas.map(persona => (
                                                 <button
                                                     key={persona.id}
                                                     onClick={() => handleSearchClick(`/personas/${persona.id}`)}
-                                                    className="flex w-full items-center justify-between px-3 py-2 transition-colors hover:bg-surface-800"
+                                                    className="flex w-full items-center justify-between px-4 py-2.5 transition-all hover:bg-[#222]"
                                                 >
-                                                    <div className="flex items-center gap-2">
+                                                    <div className="flex items-center gap-3">
                                                         <span className="text-lg">{persona.emoji}</span>
-                                                        <span className="text-sm text-surface-200">{persona.name}</span>
+                                                        <span className="text-sm text-gray-200">{persona.name}</span>
                                                     </div>
-                                                    <ArrowRight className="h-3 w-3 text-surface-500" />
+                                                    <ArrowRight className="h-3.5 w-3.5 text-gray-600" />
                                                 </button>
                                             ))}
                                         </div>
@@ -135,19 +163,21 @@ export function Header() {
 
                                     {/* Opportunities */}
                                     {searchResults.opportunities.length > 0 && (
-                                        <div className="border-t border-surface-800 pt-2">
-                                            <div className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-surface-500">
-                                                <Lightbulb className="h-3 w-3" />
-                                                Opportunities
+                                        <div className="border-t border-[#222] pt-1">
+                                            <div className="flex items-center gap-2 px-4 py-2">
+                                                <div className="flex h-5 w-5 items-center justify-center rounded-md bg-amber-500/10">
+                                                    <Lightbulb className="h-3 w-3 text-amber-400" />
+                                                </div>
+                                                <span className="text-xs font-bold uppercase tracking-wider text-gray-500">Opportunities</span>
                                             </div>
                                             {searchResults.opportunities.map(opp => (
                                                 <button
                                                     key={opp.id}
                                                     onClick={() => handleSearchClick('/opportunities')}
-                                                    className="flex w-full items-center justify-between px-3 py-2 transition-colors hover:bg-surface-800"
+                                                    className="flex w-full items-center justify-between px-4 py-2.5 transition-all hover:bg-[#222]"
                                                 >
-                                                    <span className="truncate pr-4 text-left text-sm text-surface-200">{opp.title}</span>
-                                                    <ArrowRight className="h-3 w-3 shrink-0 text-surface-500" />
+                                                    <span className="truncate pr-4 text-left text-sm text-gray-200">{opp.title}</span>
+                                                    <ArrowRight className="h-3.5 w-3.5 shrink-0 text-gray-600" />
                                                 </button>
                                             ))}
                                         </div>

@@ -1,290 +1,737 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Gift, Heart, MapPin, Star, Clock, Sparkles, Share2, RotateCcw, ArrowRight, ChevronLeft, ChevronRight, Utensils, Coffee, Palette } from 'lucide-react'
+import { Gift, Heart, MapPin, Star, Clock, Sparkles, X, ChevronRight, Trophy, Flame } from 'lucide-react'
 import Link from 'next/link'
 import { useCupid } from '@/context/CupidContext'
-import { ARCHETYPE_DEFINITIONS, VIBE_DEFINITIONS, TIME_WINDOW_DEFINITIONS } from '@/data/cupid-data'
+import { ARCHETYPE_DEFINITIONS, VIBE_DEFINITIONS } from '@/data/cupid-data'
 import { cn } from '@/lib/utils'
 
 const FULL_WRAPPED_THRESHOLD = 5
+const SLIDE_DURATION = 6000 // 6 seconds per slide
 
 // ============================================
-// Wrapped Card Components
+// Counting Number Animation
 // ============================================
 
-function StatCard({
-    label,
-    value,
-    icon: Icon,
-    color,
-    delay = 0
+function CountingNumber({ value, duration = 2000 }: { value: number; duration?: number }) {
+    const [count, setCount] = useState(0)
+
+    useEffect(() => {
+        let startTime: number
+        let animationFrame: number
+
+        const animate = (timestamp: number) => {
+            if (!startTime) startTime = timestamp
+            const progress = Math.min((timestamp - startTime) / duration, 1)
+            setCount(Math.floor(progress * value))
+            if (progress < 1) {
+                animationFrame = requestAnimationFrame(animate)
+            }
+        }
+
+        animationFrame = requestAnimationFrame(animate)
+        return () => cancelAnimationFrame(animationFrame)
+    }, [value, duration])
+
+    return <>{count}</>
+}
+
+// ============================================
+// Stories Progress Bar
+// ============================================
+
+function StoriesProgress({
+    current,
+    total,
+    progress
 }: {
-    label: string
-    value: string | number
-    icon: React.ComponentType<{ className?: string }>
-    color: string
-    delay?: number
+    current: number
+    total: number
+    progress: number
 }) {
     return (
-        <motion.div
-            initial={{ opacity: 0, scale: 0.8, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ delay, type: 'spring', stiffness: 200 }}
-            className={cn(
-                'flex flex-col items-center gap-2 rounded-2xl p-6',
-                `bg-gradient-to-br ${color}`
-            )}
-        >
-            <Icon className="h-8 w-8 text-white/80" />
-            <span className="text-3xl font-black text-white">{value}</span>
-            <span className="text-sm font-medium text-white/70">{label}</span>
+        <div className="absolute top-8 left-6 right-6 z-50 flex gap-1.5">
+            {Array.from({ length: total }).map((_, i) => (
+                <div
+                    key={i}
+                    className="h-1 flex-1 rounded-full bg-white/20 overflow-hidden"
+                >
+                    <motion.div
+                        className="h-full bg-white"
+                        initial={{ width: i < current ? '100%' : '0%' }}
+                        animate={{
+                            width: i < current ? '100%' : i === current ? `${progress}%` : '0%'
+                        }}
+                        transition={{ duration: 0.1 }}
+                    />
+                </div>
+            ))}
+        </div>
+    )
+}
+
+// ============================================
+// Ambient Glow Background
+// ============================================
+
+function AmbientGlow() {
+    return (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {/* Animated glow 1 - Top right, drifts down-left */}
+            <motion.div
+                className="absolute w-[500px] h-[500px] rounded-full opacity-25"
+                style={{
+                    background: 'radial-gradient(circle, #FE3C72 0%, transparent 70%)',
+                    filter: 'blur(80px)',
+                }}
+                animate={{
+                    x: [100, -50, 100],
+                    y: [-100, 50, -100],
+                }}
+                transition={{
+                    duration: 20,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                }}
+                initial={{ top: '-10%', right: '-10%' }}
+            />
+
+            {/* Animated glow 2 - Bottom left, drifts up-right */}
+            <motion.div
+                className="absolute w-[400px] h-[400px] rounded-full opacity-20"
+                style={{
+                    background: 'radial-gradient(circle, #FF6B6B 0%, transparent 70%)',
+                    filter: 'blur(100px)',
+                }}
+                animate={{
+                    x: [-50, 80, -50],
+                    y: [50, -80, 50],
+                }}
+                transition={{
+                    duration: 25,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                }}
+                initial={{ bottom: '-5%', left: '-5%' }}
+            />
+
+            {/* Animated glow 3 - Center left, drifts horizontally */}
+            <motion.div
+                className="absolute w-[350px] h-[350px] rounded-full opacity-15"
+                style={{
+                    background: 'radial-gradient(circle, #FE3C72 0%, transparent 65%)',
+                    filter: 'blur(90px)',
+                }}
+                animate={{
+                    x: [0, 100, 0],
+                    y: [-30, 30, -30],
+                }}
+                transition={{
+                    duration: 18,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                }}
+                initial={{ top: '30%', left: '-8%' }}
+            />
+
+            {/* Animated glow 4 - Top center, drifts down */}
+            <motion.div
+                className="absolute w-[450px] h-[450px] rounded-full opacity-15"
+                style={{
+                    background: 'radial-gradient(circle, #FF8A8A 0%, transparent 70%)',
+                    filter: 'blur(120px)',
+                }}
+                animate={{
+                    y: [-50, 100, -50],
+                    scale: [1, 1.1, 1],
+                }}
+                transition={{
+                    duration: 22,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                }}
+                initial={{ top: '-15%', left: '30%' }}
+            />
+
+            {/* Animated glow 5 - Right side, drifts vertically */}
+            <motion.div
+                className="absolute w-[300px] h-[300px] rounded-full opacity-20"
+                style={{
+                    background: 'radial-gradient(circle, #FE3C72 0%, transparent 60%)',
+                    filter: 'blur(70px)',
+                }}
+                animate={{
+                    y: [0, -120, 0],
+                    x: [-20, 40, -20],
+                }}
+                transition={{
+                    duration: 15,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                }}
+                initial={{ top: '50%', right: '-5%' }}
+            />
+
+            {/* Center pulsing glow */}
+            <motion.div
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full"
+                style={{
+                    background: 'radial-gradient(circle, #FE3C72 0%, transparent 50%)',
+                    filter: 'blur(120px)',
+                }}
+                animate={{
+                    opacity: [0.08, 0.15, 0.08],
+                    scale: [0.9, 1.1, 0.9],
+                }}
+                transition={{
+                    duration: 8,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                }}
+            />
+        </div>
+    )
+}
+
+// ============================================
+// Individual Slide Components
+// ============================================
+
+// Slide 1: Intro
+function IntroSlide() {
+    return (
+        <motion.div className="flex flex-col items-center justify-center text-center">
+            <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
+                className="relative mb-8"
+            >
+                <div className="flex h-32 w-32 items-center justify-center rounded-3xl bg-gradient-to-br from-[#FE3C72] to-[#FF6B6B] shadow-2xl shadow-[#FE3C72]/40">
+                    <Heart className="h-16 w-16 text-white" fill="white" />
+                </div>
+                <motion.div
+                    animate={{ scale: [1, 1.3, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="absolute inset-0 rounded-3xl bg-[#FE3C72]/20 blur-2xl -z-10"
+                />
+            </motion.div>
+            <motion.h1
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="text-8xl font-black text-white mb-4"
+            >
+                2025.
+            </motion.h1>
+            <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+                className="text-xl text-gray-400"
+            >
+                The year you made memories together.
+            </motion.p>
         </motion.div>
     )
 }
 
-function ArchetypeCard({ archetype }: { archetype: string }) {
+// Slide 2: Total Dates
+function TotalDatesSlide({ count }: { count: number }) {
+    return (
+        <motion.div className="flex flex-col items-center justify-center text-center">
+            <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-xl text-gray-400 mb-4"
+            >
+                You went on
+            </motion.p>
+            <motion.div
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: 'spring', delay: 0.3 }}
+                className="text-9xl font-black bg-gradient-to-r from-[#FE3C72] to-[#FF6B6B] bg-clip-text text-transparent mb-4"
+            >
+                <CountingNumber value={count} />
+            </motion.div>
+            <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+                className="text-3xl font-bold text-white"
+            >
+                dates together
+            </motion.p>
+        </motion.div>
+    )
+}
+
+// Slide 3: Archetype Reveal
+function ArchetypeSlide({ archetype }: { archetype: string }) {
     const def = ARCHETYPE_DEFINITIONS[archetype as keyof typeof ARCHETYPE_DEFINITIONS]
     if (!def) return null
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 30, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ delay: 0.2, type: 'spring' }}
-            className={cn(
-                'relative overflow-hidden rounded-3xl p-8 text-center',
-                `bg-gradient-to-br ${def.gradient}`
-            )}
-        >
-            {/* Decorative elements */}
-            <div className="absolute -left-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
-            <div className="absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
-
-            {/* Sparkle particles */}
-            {[...Array(6)].map((_, i) => (
-                <motion.div
-                    key={i}
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{
-                        opacity: [0, 1, 0],
-                        scale: [0, 1, 0],
-                        x: Math.random() * 200 - 100,
-                        y: Math.random() * 200 - 100
-                    }}
-                    transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        delay: i * 0.4,
-                    }}
-                    className="absolute left-1/2 top-1/2 h-2 w-2 rounded-full bg-white"
-                />
-            ))}
-
+        <motion.div className="flex flex-col items-center justify-center text-center max-w-lg">
+            <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-lg text-gray-400 mb-6"
+            >
+                Your dating archetype is...
+            </motion.p>
             <motion.div
-                animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
-                transition={{ duration: 4, repeat: Infinity }}
-                className="relative z-10 mb-4 text-7xl"
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: 'spring', stiffness: 150, delay: 0.3 }}
+                className="text-9xl mb-6"
             >
                 {def.emoji}
             </motion.div>
-            <h2 className="relative z-10 mb-2 text-3xl font-black text-white">{def.label}</h2>
-            <p className="relative z-10 text-sm text-white/80">{def.description}</p>
+            <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className="text-4xl font-black text-white mb-4"
+            >
+                {def.label}
+            </motion.h2>
+            <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.9 }}
+                className="text-gray-400 leading-relaxed"
+            >
+                {def.description}
+            </motion.p>
         </motion.div>
     )
 }
 
-// ============================================
-// Slideshow Component for Full Wrapped
-// ============================================
+// Slide 4: Top Vibe
+function TopVibeSlide({ vibes }: { vibes: string[] }) {
+    if (!vibes || vibes.length === 0) {
+        return (
+            <motion.div className="flex flex-col items-center justify-center text-center">
+                <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-lg text-gray-400 mb-6"
+                >
+                    Your dating vibe
+                </motion.p>
+                <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="text-6xl mb-4"
+                >
+                    ✨
+                </motion.div>
+                <motion.h2 className="text-3xl font-black text-white">
+                    Adventurous
+                </motion.h2>
+            </motion.div>
+        )
+    }
 
-function WrappedSlideshow({ wrappedData }: { wrappedData: NonNullable<ReturnType<typeof useCupid>['state']['wrappedData']> }) {
-    const [slide, setSlide] = useState(0)
-    const totalSlides = 5
+    const topVibe = vibes[0]
+    const def = VIBE_DEFINITIONS[topVibe]
 
-    const nextSlide = () => setSlide((s) => (s + 1) % totalSlides)
-    const prevSlide = () => setSlide((s) => (s - 1 + totalSlides) % totalSlides)
+    if (!def) {
+        return (
+            <motion.div className="flex flex-col items-center justify-center text-center">
+                <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-lg text-gray-400 mb-6"
+                >
+                    Your #1 date vibe
+                </motion.p>
+                <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="text-6xl mb-4"
+                >
+                    💫
+                </motion.div>
+                <motion.h2 className="text-4xl font-black text-white capitalize">
+                    {topVibe.replace(/-/g, ' ')}
+                </motion.h2>
+            </motion.div>
+        )
+    }
 
-    const slides = [
-        // Slide 0: Archetype reveal
-        <motion.div
-            key="archetype"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex flex-col items-center"
-        >
+    return (
+        <motion.div className="flex flex-col items-center justify-center text-center">
+            <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-lg text-gray-400 mb-6"
+            >
+                Your #1 date vibe
+            </motion.p>
             <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: 'spring', delay: 0.2 }}
-                className="mb-6"
+                className={cn(
+                    "inline-flex items-center gap-4 rounded-3xl px-10 py-6 mb-6",
+                    `bg-gradient-to-r ${def.color}`
+                )}
             >
-                <ArchetypeCard archetype={wrappedData.archetype} />
+                <span className="text-6xl">{def.emoji}</span>
+                <span className="text-4xl font-black text-white">{def.label}</span>
             </motion.div>
-            <p className="text-surface-400 text-center">Your relationship archetype</p>
-        </motion.div>,
-
-        // Slide 1: Stats overview
-        <motion.div
-            key="stats"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="grid grid-cols-2 gap-4"
-        >
-            <StatCard icon={Heart} value={wrappedData.totalDatesCompleted} label="Dates Together" color="from-pink-500 to-rose-500" delay={0.1} />
-            <StatCard icon={Star} value={wrappedData.averageRating} label="Avg Rating" color="from-amber-500 to-orange-500" delay={0.2} />
-            <StatCard icon={MapPin} value={wrappedData.stats.neighborhoodCount} label="Neighborhoods" color="from-emerald-500 to-teal-500" delay={0.3} />
-            <StatCard icon={Clock} value={`${Math.round(wrappedData.stats.totalHoursSpent)}h`} label="Hours Spent" color="from-blue-500 to-indigo-500" delay={0.4} />
-        </motion.div>,
-
-        // Slide 2: Top vibes
-        <motion.div
-            key="vibes"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="text-center"
-        >
-            <motion.div
-                initial={{ y: 20 }}
-                animate={{ y: 0 }}
-            >
-                <h3 className="mb-6 text-2xl font-bold text-white">Your Top Vibes</h3>
-                <div className="flex flex-wrap justify-center gap-3">
-                    {wrappedData.topVibes.map((vibe, i) => {
-                        const def = VIBE_DEFINITIONS[vibe]
+            {vibes.length > 1 && (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
+                    className="flex gap-3"
+                >
+                    {vibes.slice(1, 4).map((vibe, i) => {
+                        const vibeDef = VIBE_DEFINITIONS[vibe]
+                        if (!vibeDef) return null
                         return (
                             <motion.span
                                 key={vibe}
                                 initial={{ opacity: 0, scale: 0 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: 0.2 + i * 0.15 }}
-                                className={cn(
-                                    'inline-flex items-center gap-2 rounded-full px-5 py-3 text-lg font-medium text-white',
-                                    `bg-gradient-to-r ${def?.color || 'from-gray-500 to-gray-600'}`
-                                )}
+                                transition={{ delay: 0.8 + i * 0.1 }}
+                                className="rounded-full bg-white/10 px-4 py-2 text-sm text-white"
                             >
-                                <span className="text-2xl">{def?.emoji}</span> {def?.label}
+                                {vibeDef.emoji} {vibeDef.label}
                             </motion.span>
                         )
                     })}
-                </div>
-            </motion.div>
-        </motion.div>,
-
-        // Slide 3: Favorite neighborhood
-        <motion.div
-            key="neighborhood"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="text-center"
-        >
-            <motion.div
-                initial={{ scale: 0.8 }}
-                animate={{ scale: 1 }}
-                className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500"
-            >
-                <MapPin className="h-10 w-10 text-white" />
-            </motion.div>
-            <h3 className="mb-2 text-lg text-surface-400">Your Go-To Neighborhood</h3>
-            <motion.p
-                initial={{ y: 10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="text-4xl font-black text-white"
-            >
-                {wrappedData.mostVisitedNeighborhood}
-            </motion.p>
-        </motion.div>,
-
-        // Slide 4: Best date
-        <motion.div
-            key="best"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="text-center"
-        >
-            {wrappedData.bestDate && (
-                <>
-                    <motion.div
-                        initial={{ rotate: -10, scale: 0 }}
-                        animate={{ rotate: 0, scale: 1 }}
-                        transition={{ type: 'spring' }}
-                        className="mb-6 inline-flex items-center gap-2 rounded-full bg-amber-500 px-4 py-2 text-sm font-bold text-white"
-                    >
-                        <Star className="h-4 w-4" fill="currentColor" />
-                        Best Date of the Year
-                    </motion.div>
-                    <motion.h3
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 0.2 }}
-                        className="mb-2 text-3xl font-black text-white"
-                    >
-                        {wrappedData.bestDate.dateIdeaTitle}
-                    </motion.h3>
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.4 }}
-                        className="flex items-center justify-center gap-4 text-surface-400"
-                    >
-                        <span className="flex items-center gap-1">
-                            <Star className="h-4 w-4 text-amber-400" fill="currentColor" />
-                            {wrappedData.bestDate.rating}/5
-                        </span>
-                        <span className="flex items-center gap-1">
-                            <MapPin className="h-4 w-4" />
-                            {wrappedData.bestDate.neighborhood}
-                        </span>
-                    </motion.div>
-                </>
+                </motion.div>
             )}
-        </motion.div>,
+        </motion.div>
+    )
+}
+
+// Slide 5: Favorite Neighborhood
+function NeighborhoodSlide({ neighborhood }: { neighborhood: string }) {
+    // Clean up neighborhood display - remove city-level names
+    const displayNeighborhood = neighborhood && neighborhood !== 'New York' && neighborhood !== 'NYC'
+        ? neighborhood
+        : 'All Over Town'
+
+    return (
+        <motion.div className="flex flex-col items-center justify-center text-center">
+            <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-lg text-gray-400 mb-6"
+            >
+                Your go-to spot
+            </motion.p>
+            <motion.div
+                initial={{ scale: 0, y: 50 }}
+                animate={{ scale: 1, y: 0 }}
+                transition={{ type: 'spring', delay: 0.2 }}
+                className="mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-2xl shadow-emerald-500/30"
+            >
+                <MapPin className="h-12 w-12 text-white" />
+            </motion.div>
+            <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="text-5xl font-black text-white"
+            >
+                {displayNeighborhood}
+            </motion.h2>
+        </motion.div>
+    )
+}
+
+// Slide 6: Best Date
+function BestDateSlide({ date }: { date: { dateIdeaTitle: string; rating: number; neighborhood: string } | null }) {
+    if (!date) return null
+
+    return (
+        <motion.div className="flex flex-col items-center justify-center text-center max-w-lg">
+            <motion.div
+                initial={{ scale: 0, rotate: -30 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: 'spring', delay: 0.1 }}
+                className="mb-6 flex items-center gap-2 rounded-full bg-amber-500 px-5 py-2.5"
+            >
+                <Trophy className="h-5 w-5 text-white" fill="white" />
+                <span className="font-bold text-white">Best Date of the Year</span>
+            </motion.div>
+            <motion.h2
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="text-4xl font-black text-white mb-4"
+            >
+                {date.dateIdeaTitle}
+            </motion.h2>
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.7 }}
+                className="flex items-center gap-6 text-gray-400"
+            >
+                <span className="flex items-center gap-2">
+                    <Star className="h-5 w-5 text-amber-400" fill="currentColor" />
+                    <span className="text-xl font-bold text-white">{date.rating}/5</span>
+                </span>
+                <span className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5" />
+                    {date.neighborhood}
+                </span>
+            </motion.div>
+        </motion.div>
+    )
+}
+
+// Slide 7: Stats Grid
+function StatsSlide({ stats, avgRating }: { stats: { neighborhoodCount: number; totalHoursSpent: number }; avgRating: number }) {
+    const statItems = [
+        { icon: MapPin, value: stats.neighborhoodCount, label: 'Neighborhoods', color: 'from-emerald-500 to-teal-500', delay: 0.1 },
+        { icon: Star, value: avgRating.toFixed(1), label: 'Avg Rating', color: 'from-amber-500 to-orange-500', delay: 0.2 },
+        { icon: Clock, value: Math.round(stats.totalHoursSpent), label: 'Hours Spent', color: 'from-blue-500 to-indigo-500', delay: 0.3 },
+        { icon: Flame, value: '🔥', label: 'Chemistry', color: 'from-pink-500 to-rose-500', delay: 0.4 },
     ]
 
     return (
-        <div className="relative">
-            {/* Slide Content */}
-            <div className="min-h-[400px] flex items-center justify-center">
+        <motion.div className="text-center">
+            <motion.h3
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-lg text-gray-400 mb-8"
+            >
+                By the numbers
+            </motion.h3>
+            <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
+                {statItems.map((stat) => (
+                    <motion.div
+                        key={stat.label}
+                        initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        transition={{ delay: stat.delay, type: 'spring' }}
+                        className={cn(
+                            'flex flex-col items-center gap-2 rounded-2xl p-6',
+                            `bg-gradient-to-br ${stat.color}`
+                        )}
+                    >
+                        <stat.icon className="h-6 w-6 text-white/80" />
+                        <span className="text-3xl font-black text-white">{stat.value}</span>
+                        <span className="text-xs font-medium text-white/70">{stat.label}</span>
+                    </motion.div>
+                ))}
+            </div>
+        </motion.div>
+    )
+}
+
+// Slide 8: Outro
+function OutroSlide() {
+    return (
+        <motion.div className="flex flex-col items-center justify-center text-center">
+            <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', delay: 0.2 }}
+                className="text-8xl mb-8"
+            >
+                💕
+            </motion.div>
+            <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="text-4xl font-black text-white mb-4"
+            >
+                Here's to more adventures
+            </motion.h2>
+            <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                className="text-gray-400 mb-8"
+            >
+                Keep making memories together
+            </motion.p>
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+            >
+                <Link
+                    href="/cupid"
+                    className="flex items-center gap-2 rounded-full bg-gradient-to-r from-[#FE3C72] to-[#FF6B6B] px-6 py-3 font-semibold text-white"
+                >
+                    Plan Next Date
+                    <ChevronRight className="h-4 w-4" />
+                </Link>
+            </motion.div>
+        </motion.div>
+    )
+}
+
+// ============================================
+// Main Stories Component
+// ============================================
+
+function WrappedStories({ wrappedData, onClose }: {
+    wrappedData: NonNullable<ReturnType<typeof useCupid>['state']['wrappedData']>
+    onClose: () => void
+}) {
+    const [currentSlide, setCurrentSlide] = useState(0)
+    const [progress, setProgress] = useState(0)
+    const [isPaused, setIsPaused] = useState(false)
+
+    const totalSlides = 8
+
+    const slides = [
+        <IntroSlide key="intro" />,
+        <TotalDatesSlide key="total" count={wrappedData.totalDatesCompleted} />,
+        <ArchetypeSlide key="archetype" archetype={wrappedData.archetype} />,
+        <TopVibeSlide key="vibes" vibes={wrappedData.topVibes || []} />,
+        <NeighborhoodSlide key="neighborhood" neighborhood={wrappedData.mostVisitedNeighborhood} />,
+        <BestDateSlide key="best" date={wrappedData.bestDate} />,
+        <StatsSlide key="stats" stats={wrappedData.stats} avgRating={parseFloat(wrappedData.averageRating)} />,
+        <OutroSlide key="outro" />,
+    ]
+
+    const nextSlide = useCallback(() => {
+        if (currentSlide < totalSlides - 1) {
+            setCurrentSlide(s => s + 1)
+            setProgress(0)
+        }
+    }, [currentSlide, totalSlides])
+
+    const prevSlide = useCallback(() => {
+        if (currentSlide > 0) {
+            setCurrentSlide(s => s - 1)
+            setProgress(0)
+        }
+    }, [currentSlide])
+
+    // Auto-advance timer - continues on last slide but doesn't advance
+    useEffect(() => {
+        if (isPaused) return
+
+        const interval = setInterval(() => {
+            setProgress(p => {
+                if (p >= 100) {
+                    if (currentSlide < totalSlides - 1) {
+                        nextSlide()
+                    }
+                    return currentSlide === totalSlides - 1 ? 100 : 0
+                }
+                return p + (100 / (SLIDE_DURATION / 100))
+            })
+        }, 100)
+
+        return () => clearInterval(interval)
+    }, [currentSlide, isPaused, nextSlide, totalSlides])
+
+    // Handle click navigation
+    const handleClick = (e: React.MouseEvent) => {
+        const rect = e.currentTarget.getBoundingClientRect()
+        const x = e.clientX - rect.left
+        const third = rect.width / 3
+
+        if (x < third) {
+            prevSlide()
+        } else if (x > third * 2) {
+            nextSlide()
+        } else {
+            setIsPaused(p => !p)
+        }
+    }
+
+    // Keyboard navigation
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'ArrowLeft') prevSlide()
+            if (e.key === 'ArrowRight') nextSlide()
+            if (e.key === 'Escape') onClose()
+            if (e.key === ' ') {
+                e.preventDefault()
+                setIsPaused(p => !p)
+            }
+        }
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [nextSlide, prevSlide, onClose])
+
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex flex-col bg-black"
+            onClick={handleClick}
+        >
+            {/* Solid black background */}
+            <div className="absolute inset-0 bg-black" />
+
+            {/* Subtle gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-black to-[#0a0a0a]" />
+
+            {/* Floating hearts background */}
+            <AmbientGlow />
+
+            {/* Progress bar */}
+            <StoriesProgress current={currentSlide} total={totalSlides} progress={progress} />
+
+            {/* Close button - positioned lower */}
+            <button
+                onClick={(e) => {
+                    e.stopPropagation()
+                    onClose()
+                }}
+                className="absolute top-16 right-6 z-50 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-all"
+            >
+                <X className="h-5 w-5" />
+            </button>
+
+            {/* Pause indicator */}
+            <AnimatePresence>
+                {isPaused && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 flex h-20 w-20 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm"
+                    >
+                        <div className="flex gap-2">
+                            <div className="h-6 w-2 rounded-full bg-white" />
+                            <div className="h-6 w-2 rounded-full bg-white" />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Slide content */}
+            <div className="relative flex-1 flex items-center justify-center px-8">
                 <AnimatePresence mode="wait">
-                    {slides[slide]}
+                    <motion.div
+                        key={currentSlide}
+                        initial={{ opacity: 0, x: 50, scale: 0.95 }}
+                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                        exit={{ opacity: 0, x: -50, scale: 0.95 }}
+                        transition={{ duration: 0.3, ease: 'easeOut' }}
+                    >
+                        {slides[currentSlide]}
+                    </motion.div>
                 </AnimatePresence>
             </div>
 
-            {/* Navigation */}
-            <div className="mt-8 flex items-center justify-center gap-4">
-                <button
-                    onClick={prevSlide}
-                    className="rounded-full bg-surface-800 p-3 text-surface-400 transition-colors hover:bg-surface-700 hover:text-white"
-                >
-                    <ChevronLeft className="h-5 w-5" />
-                </button>
-                <div className="flex gap-2">
-                    {Array.from({ length: totalSlides }).map((_, i) => (
-                        <button
-                            key={i}
-                            onClick={() => setSlide(i)}
-                            className={cn(
-                                'h-2 rounded-full transition-all',
-                                i === slide ? 'w-8 bg-purple-500' : 'w-2 bg-surface-600'
-                            )}
-                        />
-                    ))}
-                </div>
-                <button
-                    onClick={nextSlide}
-                    className="rounded-full bg-surface-800 p-3 text-surface-400 transition-colors hover:bg-surface-700 hover:text-white"
-                >
-                    <ChevronRight className="h-5 w-5" />
-                </button>
+            {/* Navigation hints */}
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-xs text-gray-600">
+                Tap sides to navigate · Center to pause
             </div>
-        </div>
+        </motion.div>
     )
 }
 
@@ -293,18 +740,14 @@ function WrappedSlideshow({ wrappedData }: { wrappedData: NonNullable<ReturnType
 // ============================================
 
 export default function WrappedPage() {
-    const { state, generateWrapped, getCompletedDates, isLoading } = useCupid()
+    const { state, generateWrapped, getCompletedDates } = useCupid()
     const [wrappedData, setWrappedData] = useState(state.wrappedData)
-    const [showUnlockAnimation, setShowUnlockAnimation] = useState(false)
+    const [showStories, setShowStories] = useState(false)
 
     useEffect(() => {
         if (!wrappedData && state.completedDates.length > 0) {
             const data = generateWrapped()
             if (data) {
-                if (state.completedDates.length >= FULL_WRAPPED_THRESHOLD) {
-                    setShowUnlockAnimation(true)
-                    setTimeout(() => setShowUnlockAnimation(false), 3000)
-                }
                 setWrappedData(data)
             }
         }
@@ -315,69 +758,69 @@ export default function WrappedPage() {
     // Not ready state
     if (!state.isOnboarded) {
         return (
-            <div className="flex flex-col items-center justify-center px-6 py-20">
+            <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center px-6">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="text-center"
+                    className="text-center max-w-md"
                 >
-                    <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-violet-500 to-purple-500 mx-auto">
-                        <Gift className="h-12 w-12 text-white" />
+                    <div className="mb-8 flex h-28 w-28 items-center justify-center rounded-3xl bg-gradient-to-br from-[#FE3C72] to-[#FF6B6B] mx-auto shadow-2xl shadow-[#FE3C72]/30">
+                        <Gift className="h-14 w-14 text-white" />
                     </div>
                     <h1 className="mb-4 text-3xl font-black text-white">Your Wrapped Awaits</h1>
-                    <p className="mb-8 max-w-md text-surface-400">
+                    <p className="mb-8 text-gray-400">
                         Complete your Cupid setup first, then log some dates to unlock your personalized Relationship Wrapped!
                     </p>
                     <Link
                         href="/cupid"
-                        className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 px-6 py-3 font-semibold text-white"
+                        className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#FE3C72] to-[#FF6B6B] px-6 py-3 font-semibold text-white"
                     >
-                        Start with Cupid <ArrowRight className="h-4 w-4" />
+                        Start with Cupid <ChevronRight className="h-4 w-4" />
                     </Link>
                 </motion.div>
             </div>
         )
     }
 
-    // Not enough dates - needs at least 5 for Wrapped
+    // Not enough dates
     if (completedDates.length < FULL_WRAPPED_THRESHOLD) {
         const remaining = FULL_WRAPPED_THRESHOLD - completedDates.length
         return (
-            <div className="flex flex-col items-center justify-center px-6 py-20">
+            <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center px-6">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="text-center"
+                    className="text-center max-w-md"
                 >
                     <motion.div
                         animate={{ y: [-5, 5, -5] }}
                         transition={{ duration: 3, repeat: Infinity }}
-                        className="mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-violet-500 to-purple-500 mx-auto"
+                        className="mb-8 flex h-28 w-28 items-center justify-center rounded-3xl bg-gradient-to-br from-[#FE3C72] to-[#FF6B6B] mx-auto shadow-2xl shadow-[#FE3C72]/30"
                     >
-                        <Gift className="h-12 w-12 text-white" />
+                        <Gift className="h-14 w-14 text-white" />
                     </motion.div>
                     <h1 className="mb-4 text-3xl font-black text-white">Almost There!</h1>
-                    <p className="mb-2 text-surface-400">
-                        Log <span className="font-bold text-purple-400">{remaining} more date{remaining > 1 ? 's' : ''}</span> to unlock your Wrapped
+                    <p className="mb-2 text-gray-400">
+                        Log <span className="font-bold text-[#FE3C72]">{remaining} more date{remaining > 1 ? 's' : ''}</span> to unlock your Wrapped
                     </p>
-                    <p className="mb-8 text-sm text-surface-500">
+                    <p className="mb-8 text-sm text-gray-500">
                         Wrapped unlocks at {FULL_WRAPPED_THRESHOLD} dates
                     </p>
 
                     {/* Progress bar */}
-                    <div className="mx-auto mb-8 h-3 w-64 overflow-hidden rounded-full bg-surface-800">
+                    <div className="mx-auto mb-8 h-3 w-64 overflow-hidden rounded-full bg-[#1a1a1a]">
                         <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${(completedDates.length / FULL_WRAPPED_THRESHOLD) * 100}%` }}
-                            className="h-full rounded-full bg-gradient-to-r from-violet-500 to-purple-500"
+                            className="h-full rounded-full bg-gradient-to-r from-[#FE3C72] to-[#FF6B6B]"
                         />
                     </div>
 
                     <Link
                         href="/cupid"
-                        className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 px-6 py-3 font-semibold text-white"
+                        className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#FE3C72] to-[#FF6B6B] px-6 py-3 font-semibold text-white"
                     >
-                        Browse Date Ideas <ArrowRight className="h-4 w-4" />
+                        Browse Date Ideas <ChevronRight className="h-4 w-4" />
                     </Link>
                 </motion.div>
             </div>
@@ -389,93 +832,70 @@ export default function WrappedPage() {
         const data = generateWrapped()
         if (data) setWrappedData(data)
         return (
-            <div className="flex items-center justify-center py-20">
+            <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
                 <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                    className="h-12 w-12 rounded-full border-4 border-purple-500 border-t-transparent"
+                    className="h-12 w-12 rounded-full border-4 border-[#FE3C72] border-t-transparent"
                 />
             </div>
         )
     }
 
+    // Stories view
+    if (showStories) {
+        return (
+            <AnimatePresence>
+                <WrappedStories wrappedData={wrappedData} onClose={() => setShowStories(false)} />
+            </AnimatePresence>
+        )
+    }
+
+    // Landing page - properly centered
     return (
-        <div className="px-6 py-8">
-            <div className="mx-auto max-w-2xl">
-                {/* Unlock Animation Overlay */}
-                <AnimatePresence>
-                    {showUnlockAnimation && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
-                        >
-                            <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: [0, 1.2, 1] }}
-                                transition={{ duration: 0.6 }}
-                                className="text-center"
-                            >
-                                <motion.div
-                                    animate={{ rotate: [0, 360] }}
-                                    transition={{ duration: 1, delay: 0.3 }}
-                                    className="mb-6 inline-flex h-32 w-32 items-center justify-center rounded-3xl bg-gradient-to-br from-violet-500 to-purple-500"
-                                >
-                                    <Gift className="h-16 w-16 text-white" />
-                                </motion.div>
-                                <motion.h2
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.5 }}
-                                    className="text-4xl font-black text-white"
-                                >
-                                    🎉 Wrapped Unlocked!
-                                </motion.h2>
-                            </motion.div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
-                {/* Header */}
+        <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center px-6">
+            <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex flex-col items-center text-center max-w-md"
+            >
+                {/* Icon with glow */}
                 <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mb-8 text-center"
+                    animate={{ scale: [1, 1.05, 1], rotate: [0, 2, -2, 0] }}
+                    transition={{ duration: 4, repeat: Infinity }}
+                    className="relative mb-8"
                 >
-                    <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-purple-500/10 px-4 py-2 text-sm text-purple-300">
-                        <Sparkles className="h-4 w-4" />
-                        2024 Relationship Wrapped
+                    <div className="flex h-28 w-28 items-center justify-center rounded-3xl bg-gradient-to-br from-[#FE3C72] to-[#FF6B6B] shadow-2xl shadow-[#FE3C72]/40">
+                        <Gift className="h-14 w-14 text-white" />
                     </div>
-                    <h1 className="text-4xl font-black text-white">
-                        Your Year in <span className="bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent">Dates</span>
-                    </h1>
+                    <motion.div
+                        animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0.2, 0.5] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="absolute inset-0 rounded-3xl bg-[#FE3C72] blur-2xl -z-10"
+                    />
                 </motion.div>
 
-                {/* Full Wrapped Slideshow */}
-                <WrappedSlideshow wrappedData={wrappedData} />
+                {/* Title */}
+                <h1 className="mb-3 text-4xl font-black text-white">
+                    Your Year in <span className="bg-gradient-to-r from-[#FE3C72] to-[#FF6B6B] bg-clip-text text-transparent">Dates</span>
+                </h1>
 
-                {/* Share Button */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.5 }}
-                    className="mt-8 flex justify-center gap-4"
+                {/* Subtitle */}
+                <p className="mb-8 text-gray-400">
+                    Tap to experience your personalized dating story
+                </p>
+
+                {/* Button */}
+                <motion.button
+                    onClick={() => setShowStories(true)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex items-center gap-2 rounded-full bg-gradient-to-r from-[#FE3C72] to-[#FF6B6B] px-8 py-4 text-lg font-bold text-white shadow-xl shadow-[#FE3C72]/30"
                 >
-                    <button className="flex items-center gap-2 rounded-full bg-white px-6 py-3 font-semibold text-surface-900 transition-all hover:bg-surface-100">
-                        <Share2 className="h-4 w-4" />
-                        Share Wrapped
-                    </button>
-                    <Link
-                        href="/cupid"
-                        className="flex items-center gap-2 rounded-full border border-surface-600 px-6 py-3 font-semibold text-surface-300 transition-all hover:bg-surface-800"
-                    >
-                        <RotateCcw className="h-4 w-4" />
-                        Back to Cupid
-                    </Link>
-                </motion.div>
-            </div>
+                    View Wrapped
+                    <ChevronRight className="h-5 w-5" />
+                </motion.button>
+            </motion.div>
         </div>
     )
 }
-
