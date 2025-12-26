@@ -1,0 +1,32 @@
+{
+    "name": "MatchPulse",
+    "short_name": "MatchPulse",
+    "description": "Cultural Insights Dashboard - Understand dating trends and personas",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0a0a0a",
+    "theme_color": "#FE3C72",
+    "icons": [
+        {
+            "src": "/assets/MatchPulse Logo.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/favicon-32x32.png",
+            "sizes": "32x32",
+            "type": "image/png"
+        },
+        {
+            "src": "/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
