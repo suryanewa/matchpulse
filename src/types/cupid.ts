@@ -177,6 +177,19 @@ export interface WrappedData {
 }
 
 // ============================================
+// Matched Woman Types
+// ============================================
+
+export interface MatchedWoman {
+    id: string;
+    name: string;
+    age: number;
+    photo: string;
+    bio: string;
+    preferences: CupidPreferences;
+}
+
+// ============================================
 // Cupid State Types
 // ============================================
 
@@ -184,6 +197,7 @@ export interface CupidState {
     isOnboarded: boolean;
     userPreferences: CupidPreferences | null;
     partnerPreferences: CupidPreferences | null;
+    selectedMatchId: string | null;
     coupleProfile: CoupleProfile | null;
     savedDates: string[];
     completedDates: DateLog[];

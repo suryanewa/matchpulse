@@ -13,13 +13,15 @@ import {
     TimeWindow,
     CuisineType,
     DateSuggestion,
-    DateLog
+    DateLog,
+    MatchedWoman
 } from '@/types/cupid'
 import {
     VIBE_DEFINITIONS,
     BUDGET_DEFINITIONS,
     TIME_WINDOW_DEFINITIONS,
-    NYC_NEIGHBORHOODS
+    NYC_NEIGHBORHOODS,
+    MATCHED_WOMEN
 } from '@/data/cupid-data'
 import { cn } from '@/lib/utils'
 import { DateCard } from '@/components/cupid/DateCard'
@@ -138,7 +140,7 @@ function NeighborhoodStep({
                     Back
                 </button>
                 <div className="flex justify-center gap-1.5">
-                    {[1, 2, 3, 4].map((s) => (
+                    {[1, 2, 3, 4, 5].map((s) => (
                         <div
                             key={s}
                             className={cn(
@@ -216,7 +218,7 @@ function VibesStep({
             <div className="grid grid-cols-3 items-center">
                 <button onClick={onBack} className="justify-self-start flex items-center gap-2 rounded-full bg-[#2a2a2a] px-6 py-2.5 font-semibold text-gray-300 transition-all hover:bg-[#333] hover:text-white">Back</button>
                 <div className="flex justify-center gap-1.5">
-                    {[1, 2, 3, 4].map((s) => (
+                    {[1, 2, 3, 4, 5].map((s) => (
                         <div
                             key={s}
                             className={cn(
@@ -297,7 +299,7 @@ function BudgetStep({
             <div className="grid grid-cols-3 items-center">
                 <button onClick={onBack} className="justify-self-start flex items-center gap-2 rounded-full bg-[#2a2a2a] px-6 py-2.5 font-semibold text-gray-300 transition-all hover:bg-[#333] hover:text-white">Back</button>
                 <div className="flex justify-center gap-1.5">
-                    {[1, 2, 3, 4].map((s) => (
+                    {[1, 2, 3, 4, 5].map((s) => (
                         <div
                             key={s}
                             className={cn(
@@ -375,7 +377,7 @@ function TimeStep({
             <div className="grid grid-cols-3 items-center">
                 <button onClick={onBack} className="justify-self-start flex items-center gap-2 rounded-full bg-[#2a2a2a] px-6 py-2.5 font-semibold text-gray-300 transition-all hover:bg-[#333] hover:text-white">Back</button>
                 <div className="flex justify-center gap-1.5">
-                    {[1, 2, 3, 4].map((s) => (
+                    {[1, 2, 3, 4, 5].map((s) => (
                         <div
                             key={s}
                             className={cn(
@@ -395,7 +397,124 @@ function TimeStep({
                             : 'bg-[#1a1a1a] text-gray-600 cursor-not-allowed'
                     )}
                 >
-                    Finish Setup <ArrowRight className="h-4 w-4" />
+                    Next <ArrowRight className="h-4 w-4" />
+                </button>
+            </div>
+        </motion.div>
+    )
+}
+
+// ============================================
+// Match Selection Step
+// ============================================
+
+function MatchSelectionStep({
+    selected,
+    onChange,
+    onNext,
+    onBack,
+    currentStep
+}: {
+    selected: string | null
+    onChange: (matchId: string) => void
+    onNext: () => void
+    onBack: () => void
+    currentStep: number
+}) {
+    return (
+        <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            className="w-full max-w-3xl"
+        >
+            <div className="mb-8 text-center">
+                <Heart className="mx-auto mb-4 h-10 w-10 text-[#FE3C72]" fill="#FE3C72" />
+                <h2 className="mb-2 text-2xl font-bold text-white">Who are you planning dates with?</h2>
+                <p className="text-gray-400">Select your match to get personalized recommendations</p>
+            </div>
+
+            <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {MATCHED_WOMEN.map((match) => (
+                    <button
+                        key={match.id}
+                        onClick={() => onChange(match.id)}
+                        className={cn(
+                            'relative overflow-hidden rounded-2xl p-4 text-left transition-all',
+                            selected === match.id
+                                ? 'bg-gradient-to-br from-[#FE3C72]/20 to-[#FF6B6B]/20 ring-2 ring-[#FE3C72]'
+                                : 'bg-[#1a1a1a] hover:bg-[#222]'
+                        )}
+                    >
+                        {/* Photo */}
+                        <div className="mb-3 flex items-center gap-3">
+                            <div className="relative h-14 w-14 overflow-hidden rounded-full">
+                                <Image
+                                    src={match.photo}
+                                    alt={match.name}
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-white">{match.name}, {match.age}</h3>
+                                {selected === match.id && (
+                                    <span className="text-xs font-medium text-[#FE3C72]">Selected</span>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Bio */}
+                        <p className="mb-3 text-sm text-gray-400 line-clamp-2">{match.bio}</p>
+
+                        {/* Vibes */}
+                        <div className="flex flex-wrap gap-1.5">
+                            {match.preferences.vibes.slice(0, 3).map((vibe) => (
+                                <span
+                                    key={vibe}
+                                    className="rounded-full bg-[#2a2a2a] px-2 py-0.5 text-xs text-gray-300"
+                                >
+                                    {VIBE_DEFINITIONS[vibe]?.emoji} {VIBE_DEFINITIONS[vibe]?.label}
+                                </span>
+                            ))}
+                        </div>
+
+                        {/* Selected indicator */}
+                        {selected === match.id && (
+                            <div className="absolute top-3 right-3">
+                                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#FE3C72]">
+                                    <Heart className="h-3 w-3 text-white" fill="white" />
+                                </div>
+                            </div>
+                        )}
+                    </button>
+                ))}
+            </div>
+
+            <div className="grid grid-cols-3 items-center">
+                <button onClick={onBack} className="justify-self-start flex items-center gap-2 rounded-full bg-[#2a2a2a] px-6 py-2.5 font-semibold text-gray-300 transition-all hover:bg-[#333] hover:text-white">Back</button>
+                <div className="flex justify-center gap-1.5">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                        <div
+                            key={s}
+                            className={cn(
+                                'h-1.5 w-8 rounded-full transition-all',
+                                s <= currentStep ? 'bg-[#FE3C72]' : 'bg-[#2a2a2a]'
+                            )}
+                        />
+                    ))}
+                </div>
+                <button
+                    onClick={onNext}
+                    disabled={!selected}
+                    className={cn(
+                        'justify-self-end flex items-center gap-2 rounded-full px-6 py-2.5 font-semibold transition-all',
+                        selected
+                            ? 'bg-gradient-to-r from-[#FE3C72] to-[#FF6B6B] text-white'
+                            : 'bg-[#1a1a1a] text-gray-600 cursor-not-allowed'
+                    )}
+                >
+                    Start Dating <ArrowRight className="h-4 w-4" />
                 </button>
             </div>
         </motion.div>
@@ -421,9 +540,13 @@ function IdeasView({
     onRefresh?: () => void
     onLoadMore?: () => void
 }) {
-    const { saveDate, unsaveDate, logDate, markNotOurVibe, dismissDate } = useCupid()
+    const { saveDate, unsaveDate, logDate, markNotOurVibe, dismissDate, getSelectedMatch, getAllMatches, setSelectedMatch, fetchRecommendations } = useCupid()
     const [displayCount, setDisplayCount] = useState(6)
     const [filter, setFilter] = useState<'all' | 'saved'>('all')
+    const [showMatchSwitcher, setShowMatchSwitcher] = useState(false)
+
+    const selectedMatch = getSelectedMatch()
+    const allMatches = getAllMatches()
 
     // Filter recommendations based on current filter
     const filteredRecommendations = filter === 'saved'
@@ -432,6 +555,13 @@ function IdeasView({
 
     const displayedRecommendations = filteredRecommendations.slice(0, displayCount)
     const hasMore = displayCount < filteredRecommendations.length
+
+    const handleMatchSwitch = (matchId: string) => {
+        setSelectedMatch(matchId)
+        setShowMatchSwitcher(false)
+        // Refresh recommendations after switching
+        fetchRecommendations()
+    }
 
     return (
         <div className="px-4 py-6 sm:px-6">
@@ -447,6 +577,81 @@ function IdeasView({
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
+                        {/* Match Switcher - Always show */}
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowMatchSwitcher(!showMatchSwitcher)}
+                                className="flex items-center gap-2 rounded-full bg-[#1a1a1a] px-3 py-1.5 transition-all hover:bg-[#222]"
+                            >
+                                {selectedMatch ? (
+                                    <>
+                                        <div className="relative h-7 w-7 overflow-hidden rounded-full">
+                                            <Image
+                                                src={selectedMatch.photo}
+                                                alt={selectedMatch.name}
+                                                fill
+                                                className="object-cover"
+                                            />
+                                        </div>
+                                        <span className="text-sm font-medium text-gray-300">{selectedMatch.name}</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Heart className="h-5 w-5 text-[#FE3C72]" />
+                                        <span className="text-sm font-medium text-gray-300">Select Match</span>
+                                    </>
+                                )}
+                                <svg className={cn("h-4 w-4 text-gray-500 transition-transform", showMatchSwitcher && "rotate-180")} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            {/* Dropdown */}
+                            <AnimatePresence>
+                                {showMatchSwitcher && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        className="absolute right-0 top-full z-50 mt-2 w-64 overflow-hidden rounded-2xl bg-[#1a1a1a] shadow-xl ring-1 ring-white/10"
+                                    >
+                                        <div className="p-2">
+                                            <p className="px-3 py-2 text-xs font-medium uppercase text-gray-500">
+                                                {selectedMatch ? 'Switch Match' : 'Select a Match'}
+                                            </p>
+                                            {allMatches.map((match) => (
+                                                <button
+                                                    key={match.id}
+                                                    onClick={() => handleMatchSwitch(match.id)}
+                                                    className={cn(
+                                                        'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all',
+                                                        selectedMatch?.id === match.id
+                                                            ? 'bg-[#FE3C72]/20 text-white'
+                                                            : 'text-gray-300 hover:bg-[#222]'
+                                                    )}
+                                                >
+                                                    <div className="relative h-10 w-10 overflow-hidden rounded-full">
+                                                        <Image
+                                                            src={match.photo}
+                                                            alt={match.name}
+                                                            fill
+                                                            className="object-cover"
+                                                        />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <p className="font-medium">{match.name}, {match.age}</p>
+                                                        <p className="text-xs text-gray-500 line-clamp-1">{match.bio}</p>
+                                                    </div>
+                                                    {selectedMatch?.id === match.id && (
+                                                        <Heart className="h-4 w-4 text-[#FE3C72]" fill="#FE3C72" />
+                                                    )}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                         {completedCount > 0 && (
                             <span className="hidden rounded-full bg-[#1a1a1a] px-3 py-1.5 text-xs font-medium text-gray-400 sm:block">
                                 {completedCount} logged
@@ -632,6 +837,7 @@ export default function CupidPage() {
     const {
         state,
         setUserPreferences,
+        setSelectedMatch,
         completeOnboarding,
         getRecommendations,
         fetchRecommendations,
@@ -649,6 +855,7 @@ export default function CupidPage() {
         cuisines: ['coffee', 'dessert'],
         timeWindows: [],
     })
+    const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null)
 
     // Only fetch recommendations if none are cached
     useEffect(() => {
@@ -675,6 +882,9 @@ export default function CupidPage() {
     // Onboarding wizard
     const finishSetup = async () => {
         setUserPreferences(prefs)
+        if (selectedMatchId) {
+            setSelectedMatch(selectedMatchId)
+        }
         completeOnboarding()
         // Fetch recommendations after setting preferences
         await fetchRecommendations()
@@ -715,8 +925,17 @@ export default function CupidPage() {
                 <TimeStep
                     selected={prefs.timeWindows}
                     onChange={(t) => setPrefs({ ...prefs, timeWindows: t })}
-                    onNext={finishSetup}
+                    onNext={() => setStep(5)}
                     onBack={() => setStep(3)}
+                    currentStep={step}
+                />
+            )}
+            {step === 5 && (
+                <MatchSelectionStep
+                    selected={selectedMatchId}
+                    onChange={setSelectedMatchId}
+                    onNext={finishSetup}
+                    onBack={() => setStep(4)}
                     currentStep={step}
                 />
             )}

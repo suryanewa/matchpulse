@@ -417,7 +417,7 @@ export const DATE_IDEAS: Omit<DateSuggestion, 'isSaved' | 'isCompleted' | 'notOu
 ];
 
 // ============================================
-// Simulated Partner Preferences
+// Simulated Partner Preferences (Legacy)
 // ============================================
 
 export const SIMULATED_PARTNER_PREFERENCES: CupidPreferences = {
@@ -428,6 +428,112 @@ export const SIMULATED_PARTNER_PREFERENCES: CupidPreferences = {
     cuisines: ['korean', 'italian', 'japanese', 'coffee', 'dessert'],
     timeWindows: ['saturday-afternoon', 'saturday-evening', 'sunday-brunch'],
 };
+
+// ============================================
+// Matched Women Profiles
+// ============================================
+
+export interface MatchedWoman {
+    id: string;
+    name: string;
+    age: number;
+    photo: string;
+    bio: string;
+    preferences: CupidPreferences;
+}
+
+export const MATCHED_WOMEN: MatchedWoman[] = [
+    {
+        id: 'match-emma',
+        name: 'Emma',
+        age: 26,
+        photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop',
+        bio: 'Coffee addict & museum wanderer. Always down for a cozy brunch spot.',
+        preferences: {
+            city: 'NYC',
+            neighborhoods: ['West Village', 'SoHo', 'Tribeca', 'Nolita'],
+            budgetTiers: ['standard', 'treat-ourselves'],
+            vibes: ['cozy', 'artsy', 'romantic', 'foodie'],
+            cuisines: ['italian', 'french', 'coffee', 'dessert'],
+            timeWindows: ['sunday-brunch', 'saturday-afternoon', 'weeknight-evening'],
+        },
+    },
+    {
+        id: 'match-sophia',
+        name: 'Sophia',
+        age: 28,
+        photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop',
+        bio: 'Adventure seeker & rooftop enthusiast. Let\'s explore the city together!',
+        preferences: {
+            city: 'NYC',
+            neighborhoods: ['Williamsburg', 'Dumbo', 'East Village', 'Greenpoint'],
+            budgetTiers: ['low-key', 'standard', 'treat-ourselves'],
+            vibes: ['adventurous', 'nightlife', 'outdoorsy', 'active'],
+            cuisines: ['korean', 'japanese', 'thai', 'mexican'],
+            timeWindows: ['saturday-evening', 'late-night', 'saturday-afternoon'],
+        },
+    },
+    {
+        id: 'match-olivia',
+        name: 'Olivia',
+        age: 25,
+        photo: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=crop',
+        bio: 'Bookworm by day, jazz bar regular by night. Love a good speakeasy.',
+        preferences: {
+            city: 'NYC',
+            neighborhoods: ['East Village', 'West Village', 'Lower East Side', 'Chelsea'],
+            budgetTiers: ['budget', 'low-key', 'standard'],
+            vibes: ['chill', 'nerdy', 'romantic', 'nightlife'],
+            cuisines: ['coffee', 'japanese', 'american', 'dessert'],
+            timeWindows: ['weeknight-evening', 'saturday-evening', 'late-night'],
+        },
+    },
+    {
+        id: 'match-ava',
+        name: 'Ava',
+        age: 27,
+        photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=400&fit=crop',
+        bio: 'Yoga mornings & foodie nights. Find me at the farmer\'s market on Sundays.',
+        preferences: {
+            city: 'NYC',
+            neighborhoods: ['Park Slope', 'Cobble Hill', 'Upper West Side', 'Astoria'],
+            budgetTiers: ['low-key', 'standard'],
+            vibes: ['outdoorsy', 'foodie', 'chill', 'cozy'],
+            cuisines: ['mediterranean', 'indian', 'thai', 'coffee'],
+            timeWindows: ['sunday-brunch', 'sunday-afternoon', 'saturday-afternoon'],
+        },
+    },
+    {
+        id: 'match-mia',
+        name: 'Mia',
+        age: 24,
+        photo: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&h=400&fit=crop',
+        bio: 'Art gallery hopper & cocktail connoisseur. Always planning the next adventure.',
+        preferences: {
+            city: 'NYC',
+            neighborhoods: ['Chelsea', 'Hell\'s Kitchen', 'Tribeca', 'SoHo'],
+            budgetTiers: ['standard', 'treat-ourselves', 'splurge'],
+            vibes: ['artsy', 'adventurous', 'nightlife', 'romantic'],
+            cuisines: ['french', 'italian', 'japanese', 'chinese'],
+            timeWindows: ['saturday-evening', 'weeknight-evening', 'late-night'],
+        },
+    },
+    {
+        id: 'match-luna',
+        name: 'Luna',
+        age: 26,
+        photo: 'https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?w=400&h=400&fit=crop',
+        bio: 'Tech nerd by day, karaoke queen by night. Big fan of ramen and retro arcades.',
+        preferences: {
+            city: 'NYC',
+            neighborhoods: ['East Village', 'Lower East Side', 'Williamsburg', 'Bushwick'],
+            budgetTiers: ['budget', 'low-key', 'standard'],
+            vibes: ['nerdy', 'nightlife', 'adventurous', 'chill'],
+            cuisines: ['japanese', 'korean', 'thai', 'american'],
+            timeWindows: ['late-night', 'saturday-evening', 'weeknight-evening'],
+        },
+    },
+];
 
 // ============================================
 // Helper Functions

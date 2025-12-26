@@ -18,10 +18,12 @@ import {
 import {
     DATE_IDEAS,
     SIMULATED_PARTNER_PREFERENCES,
+    MATCHED_WOMEN,
     calculateOverlap,
     calculateOverlapScore,
     ARCHETYPE_DEFINITIONS,
 } from '@/data/cupid-data'
+import type { MatchedWoman } from '@/types/cupid'
 
 // ============================================
 // Context Types
@@ -37,7 +39,12 @@ interface CupidContextType {
 
     // Actions - Onboarding
     setUserPreferences: (prefs: CupidPreferences) => void
+    setSelectedMatch: (matchId: string) => void
     completeOnboarding: () => void
+
+    // Helpers - Matches
+    getSelectedMatch: () => MatchedWoman | null
+    getAllMatches: () => MatchedWoman[]
 
     // Actions - Dates
     getRecommendations: () => DateSuggestion[]
@@ -72,6 +79,7 @@ const defaultState: CupidState = {
     isOnboarded: false,
     userPreferences: null,
     partnerPreferences: SIMULATED_PARTNER_PREFERENCES,
+    selectedMatchId: null,
     coupleProfile: null,
     savedDates: [],
     completedDates: [],
@@ -277,6 +285,36 @@ export function CupidProvider({ children }: { children: React.ReactNode }) {
         setState(prev => ({ ...prev, isOnboarded: true }))
     }, [])
 
+    const setSelectedMatch = useCallback((matchId: string) => {
+        const match = MATCHED_WOMEN.find(m => m.id === matchId)
+        if (!match) return
+
+        setState(prev => {
+            const coupleProfile = prev.userPreferences
+                ? calculateCoupleProfile(prev.userPreferences, match.preferences)
+                : null
+            return {
+                ...prev,
+                selectedMatchId: matchId,
+                partnerPreferences: match.preferences,
+                coupleProfile,
+            }
+        })
+
+        // Clear cached recommendations when match changes to refresh them
+        setRecommendations([])
+        localStorage.removeItem('cupid-recommendations')
+    }, [calculateCoupleProfile])
+
+    const getSelectedMatch = useCallback((): MatchedWoman | null => {
+        if (!state.selectedMatchId) return null
+        return MATCHED_WOMEN.find(m => m.id === state.selectedMatchId) || null
+    }, [state.selectedMatchId])
+
+    const getAllMatches = useCallback((): MatchedWoman[] => {
+        return MATCHED_WOMEN
+    }, [])
+
     // ============================================
     // Sync getRecommendations to return cached data
     // ============================================
@@ -443,7 +481,10 @@ export function CupidProvider({ children }: { children: React.ReactNode }) {
         isLoadingRecommendations,
         recommendationsError,
         setUserPreferences,
+        setSelectedMatch,
         completeOnboarding,
+        getSelectedMatch,
+        getAllMatches,
         getRecommendations,
         fetchRecommendations,
         saveDate,
