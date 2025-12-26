@@ -6,6 +6,7 @@ import { Gift, Heart, MapPin, Star, Clock, Sparkles, X, ChevronRight, Trophy, Fl
 import Link from 'next/link'
 import { useCupid } from '@/context/CupidContext'
 import { ARCHETYPE_DEFINITIONS, VIBE_DEFINITIONS } from '@/data/cupid-data'
+import { VibeTag } from '@/types/cupid'
 import { cn } from '@/lib/utils'
 
 const FULL_WRAPPED_THRESHOLD = 5
@@ -312,7 +313,7 @@ function ArchetypeSlide({ archetype }: { archetype: string }) {
 }
 
 // Slide 4: Top Vibe
-function TopVibeSlide({ vibes }: { vibes: string[] }) {
+function TopVibeSlide({ vibes }: { vibes: VibeTag[] }) {
     if (!vibes || vibes.length === 0) {
         return (
             <motion.div className="flex flex-col items-center justify-center text-center">
@@ -597,7 +598,7 @@ function WrappedStories({ wrappedData, onClose }: {
         <TopVibeSlide key="vibes" vibes={wrappedData.topVibes || []} />,
         <NeighborhoodSlide key="neighborhood" neighborhood={wrappedData.mostVisitedNeighborhood} />,
         <BestDateSlide key="best" date={wrappedData.bestDate} />,
-        <StatsSlide key="stats" stats={wrappedData.stats} avgRating={parseFloat(wrappedData.averageRating)} />,
+        <StatsSlide key="stats" stats={wrappedData.stats} avgRating={wrappedData.averageRating} />,
         <OutroSlide key="outro" />,
     ]
 
